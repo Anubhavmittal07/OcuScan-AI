@@ -267,3 +267,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-06-01 18:43] Activity #002: refactor database transaction management for patient records
 - [2026-06-02 12:35] Activity #003: tune learning rate scheduler for ResNet50 anemia model
 - [2026-06-02 17:17] Activity #004: refactor database transaction management for patient records
+- [2026-06-03 13:13] Activity #005: update clinical safety checks for conjunctival pallor preservation
