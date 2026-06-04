@@ -270,3 +270,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-06-03 13:13] Activity #005: update clinical safety checks for conjunctival pallor preservation
 - [2026-06-03 20:13] Activity #006: update clinical safety checks for conjunctival pallor preservation
 - [2026-06-04 11:46] Activity #007: verify patient-level split isolation to prevent data leakage
+- [2026-06-04 20:44] Activity #008: validate laboratory hemoglobin ground-truth regression bounds
