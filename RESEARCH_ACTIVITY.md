@@ -275,3 +275,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-06-05 20:21] Activity #010: optimize eye localization ROI cropping pipeline
 - [2026-06-06 13:12] Activity #011: implement automated cross-validation on multicenter cataract manifests
 - [2026-06-06 20:41] Activity #012: update clinical safety checks for conjunctival pallor preservation
+- [2026-06-07 12:54] Activity #013: benchmark Grad-CAM attribution heatmaps generation latency
