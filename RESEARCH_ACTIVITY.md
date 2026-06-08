@@ -278,3 +278,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-06-07 12:54] Activity #013: benchmark Grad-CAM attribution heatmaps generation latency
 - [2026-06-07 21:24] Activity #014: verify patient-level split isolation to prevent data leakage
 - [2026-06-08 12:36] Activity #015: validate laboratory hemoglobin ground-truth regression bounds
+- [2026-06-08 21:06] Activity #016: enhance doctor buddy explanation prompt with clinical reasoning
