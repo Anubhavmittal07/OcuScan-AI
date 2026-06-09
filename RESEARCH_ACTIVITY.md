@@ -279,3 +279,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-06-07 21:24] Activity #014: verify patient-level split isolation to prevent data leakage
 - [2026-06-08 12:36] Activity #015: validate laboratory hemoglobin ground-truth regression bounds
 - [2026-06-08 21:06] Activity #016: enhance doctor buddy explanation prompt with clinical reasoning
+- [2026-06-09 10:35] Activity #017: optimize eye localization ROI cropping pipeline
