@@ -284,3 +284,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-06-10 12:54] Activity #019: verify patient-level split isolation to prevent data leakage
 - [2026-06-10 18:50] Activity #020: implement automated cross-validation on multicenter cataract manifests
 - [2026-06-11 11:27] Activity #021: benchmark Grad-CAM attribution heatmaps generation latency
+- [2026-06-11 18:19] Activity #022: update clinical safety checks for conjunctival pallor preservation
