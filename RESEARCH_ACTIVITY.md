@@ -288,3 +288,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-06-12 13:50] Activity #023: implement automated cross-validation on multicenter cataract manifests
 - [2026-06-12 20:17] Activity #024: update clinical safety checks for conjunctival pallor preservation
 - [2026-06-13 13:51] Activity #025: verify scleral icterus detection sensitivity across Fitzpatrick skin types
+- [2026-06-13 17:51] Activity #026: update clinical safety checks for conjunctival pallor preservation
