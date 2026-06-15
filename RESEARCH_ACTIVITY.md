@@ -291,3 +291,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-06-13 17:51] Activity #026: update clinical safety checks for conjunctival pallor preservation
 - [2026-06-14 13:15] Activity #027: optimize eye localization ROI cropping pipeline
 - [2026-06-14 21:34] Activity #028: refactor database transaction management for patient records
+- [2026-06-15 12:12] Activity #029: update clinical safety checks for conjunctival pallor preservation
