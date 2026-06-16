@@ -293,3 +293,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-06-14 21:34] Activity #028: refactor database transaction management for patient records
 - [2026-06-15 12:12] Activity #029: update clinical safety checks for conjunctival pallor preservation
 - [2026-06-15 20:24] Activity #030: calibrate model uncertainty scores for low-light smartphone captures
+- [2026-06-16 13:23] Activity #031: calibrate model uncertainty scores for low-light smartphone captures
