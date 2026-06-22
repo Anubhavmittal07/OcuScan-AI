@@ -305,3 +305,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-06-20 20:11] Activity #040: verify scleral icterus detection sensitivity across Fitzpatrick skin types
 - [2026-06-21 11:34] Activity #041: update illumination and blur sharpness thresholds in preprocessing
 - [2026-06-21 21:43] Activity #042: evaluate Bilirubin classification threshold calibration
+- [2026-06-22 13:18] Activity #043: evaluate MobileNetV3-Small on conjunctivitis validation split
