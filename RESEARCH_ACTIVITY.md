@@ -314,3 +314,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-06-25 13:10] Activity #049: optimize ONNX runtime session memory footprint
 - [2026-06-25 19:49] Activity #050: audit clinical dataset distribution for class imbalance
 - [2026-06-26 10:26] Activity #051: update bilingual English-Hindi medical report generator templates
+- [2026-06-26 21:18] Activity #052: calibrate model uncertainty scores for low-light smartphone captures
