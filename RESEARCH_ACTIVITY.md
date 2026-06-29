@@ -320,3 +320,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-06-28 13:09] Activity #055: add integration tests for multi-disease inference pipeline
 - [2026-06-28 20:30] Activity #056: verify scleral icterus detection sensitivity across Fitzpatrick skin types
 - [2026-06-29 12:53] Activity #057: verify scleral icterus detection sensitivity across Fitzpatrick skin types
+- [2026-06-29 21:31] Activity #058: benchmark Grad-CAM attribution heatmaps generation latency
