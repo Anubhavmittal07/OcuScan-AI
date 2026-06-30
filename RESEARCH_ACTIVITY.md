@@ -322,3 +322,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-06-29 12:53] Activity #057: verify scleral icterus detection sensitivity across Fitzpatrick skin types
 - [2026-06-29 21:31] Activity #058: benchmark Grad-CAM attribution heatmaps generation latency
 - [2026-06-30 11:48] Activity #059: optimize eye localization ROI cropping pipeline
+- [2026-06-30 21:39] Activity #060: benchmark mobile inference FPS on low-power edge devices
