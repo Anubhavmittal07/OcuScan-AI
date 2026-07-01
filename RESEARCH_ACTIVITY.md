@@ -323,3 +323,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-06-29 21:31] Activity #058: benchmark Grad-CAM attribution heatmaps generation latency
 - [2026-06-30 11:48] Activity #059: optimize eye localization ROI cropping pipeline
 - [2026-06-30 21:39] Activity #060: benchmark mobile inference FPS on low-power edge devices
+- [2026-07-01 12:13] Activity #061: optimize eye localization ROI cropping pipeline
