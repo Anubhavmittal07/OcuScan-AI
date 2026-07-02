@@ -325,3 +325,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-06-30 21:39] Activity #060: benchmark mobile inference FPS on low-power edge devices
 - [2026-07-01 12:13] Activity #061: optimize eye localization ROI cropping pipeline
 - [2026-07-01 21:10] Activity #062: implement automated cross-validation on multicenter cataract manifests
+- [2026-07-02 12:48] Activity #063: evaluate MobileNetV3-Small on conjunctivitis validation split
