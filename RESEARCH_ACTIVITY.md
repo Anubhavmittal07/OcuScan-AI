@@ -329,3 +329,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-07-02 18:29] Activity #064: update bilingual English-Hindi medical report generator templates
 - [2026-07-03 11:50] Activity #065: validate laboratory hemoglobin ground-truth regression bounds
 - [2026-07-03 19:11] Activity #066: evaluate Bilirubin classification threshold calibration
+- [2026-07-04 11:53] Activity #067: benchmark Grad-CAM attribution heatmaps generation latency
