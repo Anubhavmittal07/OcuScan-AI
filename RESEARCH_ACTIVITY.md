@@ -332,3 +332,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-07-04 11:53] Activity #067: benchmark Grad-CAM attribution heatmaps generation latency
 - [2026-07-04 18:21] Activity #068: verify patient-level split isolation to prevent data leakage
 - [2026-07-05 13:26] Activity #069: evaluate Bilirubin classification threshold calibration
+- [2026-07-05 20:43] Activity #070: verify scleral icterus detection sensitivity across Fitzpatrick skin types
