@@ -336,3 +336,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-07-06 13:15] Activity #071: verify patient-level split isolation to prevent data leakage
 - [2026-07-06 21:13] Activity #072: update illumination and blur sharpness thresholds in preprocessing
 - [2026-07-07 13:25] Activity #073: benchmark mobile inference FPS on low-power edge devices
+- [2026-07-07 19:23] Activity #074: update clinical safety checks for conjunctival pallor preservation
