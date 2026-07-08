@@ -338,3 +338,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-07-07 13:25] Activity #073: benchmark mobile inference FPS on low-power edge devices
 - [2026-07-07 19:23] Activity #074: update clinical safety checks for conjunctival pallor preservation
 - [2026-07-08 11:54] Activity #075: update clinical safety checks for conjunctival pallor preservation
+- [2026-07-08 17:42] Activity #076: optimize ONNX runtime session memory footprint
