@@ -342,3 +342,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-07-09 12:24] Activity #077: evaluate Bilirubin classification threshold calibration
 - [2026-07-09 17:40] Activity #078: validate laboratory hemoglobin ground-truth regression bounds
 - [2026-07-10 12:40] Activity #079: evaluate MobileNetV3-Small on conjunctivitis validation split
+- [2026-07-10 17:29] Activity #080: audit clinical dataset distribution for class imbalance
