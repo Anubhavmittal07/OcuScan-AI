@@ -344,3 +344,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-07-10 12:40] Activity #079: evaluate MobileNetV3-Small on conjunctivitis validation split
 - [2026-07-10 17:29] Activity #080: audit clinical dataset distribution for class imbalance
 - [2026-07-11 10:35] Activity #081: verify patient-level split isolation to prevent data leakage
+- [2026-07-11 21:21] Activity #082: benchmark mobile inference FPS on low-power edge devices
