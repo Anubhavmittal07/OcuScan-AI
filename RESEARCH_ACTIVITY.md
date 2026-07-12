@@ -345,3 +345,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-07-10 17:29] Activity #080: audit clinical dataset distribution for class imbalance
 - [2026-07-11 10:35] Activity #081: verify patient-level split isolation to prevent data leakage
 - [2026-07-11 21:21] Activity #082: benchmark mobile inference FPS on low-power edge devices
+- [2026-07-12 10:49] Activity #083: add integration tests for multi-disease inference pipeline
