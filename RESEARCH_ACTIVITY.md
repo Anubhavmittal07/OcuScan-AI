@@ -349,3 +349,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-07-12 19:46] Activity #084: benchmark mobile inference FPS on low-power edge devices
 - [2026-07-13 11:55] Activity #085: verify patient-level split isolation to prevent data leakage
 - [2026-07-13 19:40] Activity #086: update bilingual English-Hindi medical report generator templates
+- [2026-07-14 10:29] Activity #087: tune learning rate scheduler for ResNet50 anemia model
