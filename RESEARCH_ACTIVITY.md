@@ -356,3 +356,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-07-16 10:42] Activity #091: refactor database transaction management for patient records
 - [2026-07-16 17:16] Activity #092: implement automated cross-validation on multicenter cataract manifests
 - [2026-07-17 13:18] Activity #093: evaluate MobileNetV3-Small on conjunctivitis validation split
+- [2026-07-17 18:35] Activity #094: update clinical safety checks for conjunctival pallor preservation
