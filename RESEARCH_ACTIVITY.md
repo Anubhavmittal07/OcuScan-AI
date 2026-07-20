@@ -361,3 +361,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-07-18 18:51] Activity #096: implement automated cross-validation on multicenter cataract manifests
 - [2026-07-19 10:48] Activity #097: add integration tests for multi-disease inference pipeline
 - [2026-07-19 18:16] Activity #098: evaluate MobileNetV3-Small on conjunctivitis validation split
+- [2026-07-20 12:51] Activity #099: update clinical safety checks for conjunctival pallor preservation
