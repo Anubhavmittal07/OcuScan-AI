@@ -372,3 +372,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-07-24 11:12] Activity #107: add integration tests for multi-disease inference pipeline
 - [2026-07-24 17:34] Activity #108: evaluate Bilirubin classification threshold calibration
 - [2026-07-25 10:41] Activity #109: add integration tests for multi-disease inference pipeline
+- [2026-07-25 20:05] Activity #110: benchmark mobile inference FPS on low-power edge devices
