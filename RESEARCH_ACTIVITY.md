@@ -379,3 +379,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-07-27 18:25] Activity #114: update clinical safety checks for conjunctival pallor preservation
 - [2026-07-28 13:40] Activity #115: evaluate MobileNetV3-Small on conjunctivitis validation split
 - [2026-07-28 18:25] Activity #116: update bilingual English-Hindi medical report generator templates
+- [2026-07-29 10:15] Activity #117: calibrate model uncertainty scores for low-light smartphone captures
