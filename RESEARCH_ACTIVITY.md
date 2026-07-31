@@ -383,3 +383,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-07-29 19:35] Activity #118: validate laboratory hemoglobin ground-truth regression bounds
 - [2026-07-30 13:50] Activity #119: validate laboratory hemoglobin ground-truth regression bounds
 - [2026-07-30 19:46] Activity #120: implement automated cross-validation on multicenter cataract manifests
+- [2026-07-31 10:20] Activity #121: verify scleral icterus detection sensitivity across Fitzpatrick skin types
