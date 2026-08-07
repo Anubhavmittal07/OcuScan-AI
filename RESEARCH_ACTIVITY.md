@@ -397,3 +397,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-08-05 17:53] Activity #132: update bilingual English-Hindi medical report generator templates
 - [2026-08-06 13:48] Activity #133: enhance doctor buddy explanation prompt with clinical reasoning
 - [2026-08-06 20:09] Activity #134: benchmark Grad-CAM attribution heatmaps generation latency
+- [2026-08-07 10:13] Activity #135: update illumination and blur sharpness thresholds in preprocessing
