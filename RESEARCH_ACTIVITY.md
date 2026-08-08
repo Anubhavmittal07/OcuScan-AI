@@ -400,3 +400,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-08-07 10:13] Activity #135: update illumination and blur sharpness thresholds in preprocessing
 - [2026-08-07 21:41] Activity #136: implement automated cross-validation on multicenter cataract manifests
 - [2026-08-08 13:08] Activity #137: tune learning rate scheduler for ResNet50 anemia model
+- [2026-08-08 21:47] Activity #138: update clinical safety checks for conjunctival pallor preservation
