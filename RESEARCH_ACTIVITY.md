@@ -409,3 +409,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-08-11 17:49] Activity #144: implement automated cross-validation on multicenter cataract manifests
 - [2026-08-12 10:26] Activity #145: optimize ONNX runtime session memory footprint
 - [2026-08-12 18:33] Activity #146: benchmark Grad-CAM attribution heatmaps generation latency
+- [2026-08-13 13:29] Activity #147: calibrate model uncertainty scores for low-light smartphone captures
