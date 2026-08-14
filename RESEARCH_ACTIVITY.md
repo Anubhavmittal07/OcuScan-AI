@@ -412,3 +412,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-08-13 13:29] Activity #147: calibrate model uncertainty scores for low-light smartphone captures
 - [2026-08-13 17:34] Activity #148: run automated end-to-end clinical screening suite
 - [2026-08-14 13:15] Activity #149: run automated end-to-end clinical screening suite
+- [2026-08-14 17:44] Activity #150: validate laboratory hemoglobin ground-truth regression bounds
