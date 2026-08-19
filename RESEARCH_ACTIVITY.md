@@ -422,3 +422,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-08-18 13:41] Activity #157: update clinical safety checks for conjunctival pallor preservation
 - [2026-08-18 18:39] Activity #158: optimize eye localization ROI cropping pipeline
 - [2026-08-19 12:20] Activity #159: tune learning rate scheduler for ResNet50 anemia model
+- [2026-08-19 18:09] Activity #160: optimize ONNX runtime session memory footprint
