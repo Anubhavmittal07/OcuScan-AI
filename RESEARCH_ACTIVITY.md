@@ -423,3 +423,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-08-18 18:39] Activity #158: optimize eye localization ROI cropping pipeline
 - [2026-08-19 12:20] Activity #159: tune learning rate scheduler for ResNet50 anemia model
 - [2026-08-19 18:09] Activity #160: optimize ONNX runtime session memory footprint
+- [2026-08-20 11:10] Activity #161: add integration tests for multi-disease inference pipeline
