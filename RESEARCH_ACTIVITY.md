@@ -425,3 +425,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-08-19 18:09] Activity #160: optimize ONNX runtime session memory footprint
 - [2026-08-20 11:10] Activity #161: add integration tests for multi-disease inference pipeline
 - [2026-08-20 21:51] Activity #162: run automated end-to-end clinical screening suite
+- [2026-08-21 11:19] Activity #163: benchmark Grad-CAM attribution heatmaps generation latency
