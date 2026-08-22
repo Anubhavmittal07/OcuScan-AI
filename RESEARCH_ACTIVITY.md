@@ -34,3 +34,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-11-07T10:47:10] Iteration #0030: Completed verify patient-level split isolation to prevent data leakage.
 - [2026-08-22 12:40] Activity #001: enhance doctor buddy explanation prompt with clinical reasoning
 - [2026-08-22 15:42] Activity #002: update clinical safety checks for conjunctival pallor preservation
+- [2026-08-22 20:51] Activity #003: add integration tests for multi-disease inference pipeline
