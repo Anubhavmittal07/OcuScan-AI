@@ -36,3 +36,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-08-22 15:42] Activity #002: update clinical safety checks for conjunctival pallor preservation
 - [2026-08-22 20:51] Activity #003: add integration tests for multi-disease inference pipeline
 - [2026-08-23 10:59] Activity #004: implement automated cross-validation on multicenter cataract manifests
+- [2026-08-23 11:25] Activity #005: verify patient-level split isolation to prevent data leakage
