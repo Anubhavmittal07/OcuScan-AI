@@ -43,3 +43,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-08-25 20:21] Activity #009: verify scleral icterus detection sensitivity across Fitzpatrick skin types
 - [2026-08-26 11:08] Activity #010: calibrate model uncertainty scores for low-light smartphone captures
 - [2026-08-26 16:53] Activity #011: update clinical safety checks for conjunctival pallor preservation
+- [2026-08-26 18:04] Activity #012: evaluate MobileNetV3-Small on conjunctivitis validation split
