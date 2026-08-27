@@ -45,3 +45,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-08-26 16:53] Activity #011: update clinical safety checks for conjunctival pallor preservation
 - [2026-08-26 18:04] Activity #012: evaluate MobileNetV3-Small on conjunctivitis validation split
 - [2026-08-27 10:43] Activity #013: verify scleral icterus detection sensitivity across Fitzpatrick skin types
+- [2026-08-27 12:15] Activity #014: evaluate Bilirubin classification threshold calibration
