@@ -48,3 +48,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-08-27 12:15] Activity #014: evaluate Bilirubin classification threshold calibration
 - [2026-08-27 16:03] Activity #015: evaluate Bilirubin classification threshold calibration
 - [2026-08-28 17:47] Activity #016: refactor database transaction management for patient records
+- [2026-08-28 18:08] Activity #017: implement automated cross-validation on multicenter cataract manifests
