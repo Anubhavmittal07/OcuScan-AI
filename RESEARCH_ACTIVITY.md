@@ -52,3 +52,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-08-28 21:04] Activity #018: calibrate model uncertainty scores for low-light smartphone captures
 - [2026-08-29 17:48] Activity #019: evaluate MobileNetV3-Small on conjunctivitis validation split
 - [2026-08-29 21:50] Activity #020: add integration tests for multi-disease inference pipeline
+- [2026-08-30 13:12] Activity #021: implement automated cross-validation on multicenter cataract manifests
