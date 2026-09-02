@@ -60,3 +60,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-08-31 20:04] Activity #026: benchmark Grad-CAM attribution heatmaps generation latency
 - [2026-09-01 11:20] Activity #027: update clinical safety checks for conjunctival pallor preservation
 - [2026-09-01 13:01] Activity #028: enhance doctor buddy explanation prompt with clinical reasoning
+- [2026-09-02 10:41] Activity #029: audit clinical dataset distribution for class imbalance
