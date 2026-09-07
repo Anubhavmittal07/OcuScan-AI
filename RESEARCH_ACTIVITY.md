@@ -71,3 +71,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-09-05 20:33] Activity #037: evaluate Bilirubin classification threshold calibration
 - [2026-09-06 13:58] Activity #038: validate laboratory hemoglobin ground-truth regression bounds
 - [2026-09-06 19:36] Activity #039: calibrate model uncertainty scores for low-light smartphone captures
+- [2026-09-07 11:33] Activity #040: validate laboratory hemoglobin ground-truth regression bounds
