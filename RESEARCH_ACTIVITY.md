@@ -77,3 +77,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-09-08 15:40] Activity #043: calibrate model uncertainty scores for low-light smartphone captures
 - [2026-09-09 13:15] Activity #044: update bilingual English-Hindi medical report generator templates
 - [2026-09-09 15:08] Activity #045: tune learning rate scheduler for ResNet50 anemia model
+- [2026-09-10 09:29] Activity #046: benchmark mobile inference FPS on low-power edge devices
