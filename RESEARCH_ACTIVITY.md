@@ -79,3 +79,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-09-09 15:08] Activity #045: tune learning rate scheduler for ResNet50 anemia model
 - [2026-09-10 09:29] Activity #046: benchmark mobile inference FPS on low-power edge devices
 - [2026-09-10 18:43] Activity #047: verify patient-level split isolation to prevent data leakage
+- [2026-09-10 20:43] Activity #048: update illumination and blur sharpness thresholds in preprocessing
