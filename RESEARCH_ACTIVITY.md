@@ -83,3 +83,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-09-11 11:33] Activity #049: run automated end-to-end clinical screening suite
 - [2026-09-11 19:16] Activity #050: evaluate MobileNetV3-Small on conjunctivitis validation split
 - [2026-09-11 21:09] Activity #051: optimize ONNX runtime session memory footprint
+- [2026-09-12 09:40] Activity #052: verify scleral icterus detection sensitivity across Fitzpatrick skin types
