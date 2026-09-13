@@ -87,3 +87,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-09-12 10:09] Activity #053: verify patient-level split isolation to prevent data leakage
 - [2026-09-13 09:08] Activity #054: evaluate Bilirubin classification threshold calibration
 - [2026-09-13 17:58] Activity #055: audit clinical dataset distribution for class imbalance
+- [2026-09-13 20:08] Activity #056: calibrate model uncertainty scores for low-light smartphone captures
