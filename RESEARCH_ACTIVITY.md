@@ -86,3 +86,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-09-12 09:40] Activity #052: verify scleral icterus detection sensitivity across Fitzpatrick skin types
 - [2026-09-12 10:09] Activity #053: verify patient-level split isolation to prevent data leakage
 - [2026-09-13 09:08] Activity #054: evaluate Bilirubin classification threshold calibration
+- [2026-09-13 17:58] Activity #055: audit clinical dataset distribution for class imbalance
