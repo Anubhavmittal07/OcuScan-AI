@@ -89,3 +89,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-09-13 17:58] Activity #055: audit clinical dataset distribution for class imbalance
 - [2026-09-13 20:08] Activity #056: calibrate model uncertainty scores for low-light smartphone captures
 - [2026-09-14 15:57] Activity #057: audit clinical dataset distribution for class imbalance
+- [2026-09-14 20:30] Activity #058: run automated end-to-end clinical screening suite
