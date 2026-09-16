@@ -95,3 +95,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-09-15 20:22] Activity #061: run automated end-to-end clinical screening suite
 - [2026-09-16 10:53] Activity #062: validate laboratory hemoglobin ground-truth regression bounds
 - [2026-09-16 13:44] Activity #063: tune learning rate scheduler for ResNet50 anemia model
+- [2026-09-16 18:56] Activity #064: evaluate Bilirubin classification threshold calibration
