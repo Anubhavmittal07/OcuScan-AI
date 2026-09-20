@@ -104,3 +104,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-09-18 18:28] Activity #070: update clinical safety checks for conjunctival pallor preservation
 - [2026-09-19 16:28] Activity #071: benchmark mobile inference FPS on low-power edge devices
 - [2026-09-19 20:57] Activity #072: add integration tests for multi-disease inference pipeline
+- [2026-09-20 09:02] Activity #073: update bilingual English-Hindi medical report generator templates
