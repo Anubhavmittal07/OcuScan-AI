@@ -106,3 +106,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-09-19 20:57] Activity #072: add integration tests for multi-disease inference pipeline
 - [2026-09-20 09:02] Activity #073: update bilingual English-Hindi medical report generator templates
 - [2026-09-20 11:34] Activity #074: enhance doctor buddy explanation prompt with clinical reasoning
+- [2026-09-20 19:16] Activity #075: update illumination and blur sharpness thresholds in preprocessing
