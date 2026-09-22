@@ -110,3 +110,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-09-21 09:39] Activity #076: audit clinical dataset distribution for class imbalance
 - [2026-09-21 11:23] Activity #077: run automated end-to-end clinical screening suite
 - [2026-09-22 14:23] Activity #078: benchmark mobile inference FPS on low-power edge devices
+- [2026-09-22 19:41] Activity #079: update clinical safety checks for conjunctival pallor preservation
