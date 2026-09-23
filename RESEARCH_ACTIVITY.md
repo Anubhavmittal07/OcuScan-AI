@@ -112,3 +112,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-09-22 14:23] Activity #078: benchmark mobile inference FPS on low-power edge devices
 - [2026-09-22 19:41] Activity #079: update clinical safety checks for conjunctival pallor preservation
 - [2026-09-22 21:46] Activity #080: tune learning rate scheduler for ResNet50 anemia model
+- [2026-09-23 12:42] Activity #081: evaluate Bilirubin classification threshold calibration
