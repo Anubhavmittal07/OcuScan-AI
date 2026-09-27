@@ -122,3 +122,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-09-26 09:15] Activity #088: enhance doctor buddy explanation prompt with clinical reasoning
 - [2026-09-26 10:23] Activity #089: tune learning rate scheduler for ResNet50 anemia model
 - [2026-09-26 21:15] Activity #090: optimize eye localization ROI cropping pipeline
+- [2026-09-27 09:55] Activity #091: benchmark Grad-CAM attribution heatmaps generation latency
