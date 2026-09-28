@@ -126,3 +126,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-09-27 11:56] Activity #092: optimize ONNX runtime session memory footprint
 - [2026-09-27 15:17] Activity #093: update clinical safety checks for conjunctival pallor preservation
 - [2026-09-28 09:12] Activity #094: optimize eye localization ROI cropping pipeline
+- [2026-09-28 17:26] Activity #095: benchmark Grad-CAM attribution heatmaps generation latency
