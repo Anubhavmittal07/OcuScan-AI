@@ -129,3 +129,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-09-28 17:26] Activity #095: benchmark Grad-CAM attribution heatmaps generation latency
 - [2026-09-28 18:25] Activity #096: run automated end-to-end clinical screening suite
 - [2026-09-29 12:15] Activity #097: validate laboratory hemoglobin ground-truth regression bounds
+- [2026-09-29 16:20] Activity #098: update clinical safety checks for conjunctival pallor preservation
