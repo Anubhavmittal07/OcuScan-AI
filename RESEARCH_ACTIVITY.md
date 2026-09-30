@@ -132,3 +132,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-09-29 16:20] Activity #098: update clinical safety checks for conjunctival pallor preservation
 - [2026-09-30 10:03] Activity #099: optimize eye localization ROI cropping pipeline
 - [2026-09-30 15:29] Activity #100: add integration tests for multi-disease inference pipeline
+- [2026-09-30 19:07] Activity #101: verify scleral icterus detection sensitivity across Fitzpatrick skin types
