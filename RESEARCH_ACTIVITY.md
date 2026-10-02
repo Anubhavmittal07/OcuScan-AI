@@ -137,3 +137,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-01 17:09] Activity #103: optimize eye localization ROI cropping pipeline
 - [2026-10-01 20:10] Activity #104: verify scleral icterus detection sensitivity across Fitzpatrick skin types
 - [2026-10-02 10:28] Activity #105: evaluate Bilirubin classification threshold calibration
+- [2026-10-02 16:52] Activity #106: validate laboratory hemoglobin ground-truth regression bounds
