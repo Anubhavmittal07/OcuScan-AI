@@ -139,3 +139,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-02 10:28] Activity #105: evaluate Bilirubin classification threshold calibration
 - [2026-10-02 16:52] Activity #106: validate laboratory hemoglobin ground-truth regression bounds
 - [2026-10-02 17:10] Activity #107: verify scleral icterus detection sensitivity across Fitzpatrick skin types
+- [2026-10-03 17:05] Activity #108: add integration tests for multi-disease inference pipeline
