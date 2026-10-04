@@ -142,3 +142,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-03 17:05] Activity #108: add integration tests for multi-disease inference pipeline
 - [2026-10-03 19:32] Activity #109: tune learning rate scheduler for ResNet50 anemia model
 - [2026-10-04 09:12] Activity #110: verify patient-level split isolation to prevent data leakage
+- [2026-10-04 17:38] Activity #111: audit clinical dataset distribution for class imbalance
