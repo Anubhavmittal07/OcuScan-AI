@@ -141,3 +141,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-02 17:10] Activity #107: verify scleral icterus detection sensitivity across Fitzpatrick skin types
 - [2026-10-03 17:05] Activity #108: add integration tests for multi-disease inference pipeline
 - [2026-10-03 19:32] Activity #109: tune learning rate scheduler for ResNet50 anemia model
+- [2026-10-04 09:12] Activity #110: verify patient-level split isolation to prevent data leakage
