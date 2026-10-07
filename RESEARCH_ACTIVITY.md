@@ -150,3 +150,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-06 09:12] Activity #116: evaluate MobileNetV3-Small on conjunctivitis validation split
 - [2026-10-06 15:38] Activity #117: run automated end-to-end clinical screening suite
 - [2026-10-06 17:20] Activity #118: evaluate MobileNetV3-Small on conjunctivitis validation split
+- [2026-10-07 10:26] Activity #119: audit clinical dataset distribution for class imbalance
