@@ -153,3 +153,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-07 10:26] Activity #119: audit clinical dataset distribution for class imbalance
 - [2026-10-07 20:26] Activity #120: audit clinical dataset distribution for class imbalance
 - [2026-10-08 10:33] Activity #121: run automated end-to-end clinical screening suite
+- [2026-10-08 19:24] Activity #122: update bilingual English-Hindi medical report generator templates
