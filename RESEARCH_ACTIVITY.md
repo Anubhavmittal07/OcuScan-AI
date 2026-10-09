@@ -155,3 +155,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-08 10:33] Activity #121: run automated end-to-end clinical screening suite
 - [2026-10-08 19:24] Activity #122: update bilingual English-Hindi medical report generator templates
 - [2026-10-09 11:59] Activity #123: implement automated cross-validation on multicenter cataract manifests
+- [2026-10-09 14:40] Activity #124: calibrate model uncertainty scores for low-light smartphone captures
