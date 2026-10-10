@@ -159,3 +159,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-09 17:04] Activity #125: refactor database transaction management for patient records
 - [2026-10-10 10:05] Activity #126: evaluate Bilirubin classification threshold calibration
 - [2026-10-10 13:21] Activity #127: add integration tests for multi-disease inference pipeline
+- [2026-10-10 20:37] Activity #128: validate laboratory hemoglobin ground-truth regression bounds
