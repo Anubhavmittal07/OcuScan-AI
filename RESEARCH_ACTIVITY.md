@@ -161,3 +161,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-10 13:21] Activity #127: add integration tests for multi-disease inference pipeline
 - [2026-10-10 20:37] Activity #128: validate laboratory hemoglobin ground-truth regression bounds
 - [2026-10-11 12:03] Activity #129: calibrate model uncertainty scores for low-light smartphone captures
+- [2026-10-11 16:42] Activity #130: optimize ONNX runtime session memory footprint
