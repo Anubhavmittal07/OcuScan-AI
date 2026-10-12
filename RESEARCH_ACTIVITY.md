@@ -162,3 +162,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-10 20:37] Activity #128: validate laboratory hemoglobin ground-truth regression bounds
 - [2026-10-11 12:03] Activity #129: calibrate model uncertainty scores for low-light smartphone captures
 - [2026-10-11 16:42] Activity #130: optimize ONNX runtime session memory footprint
+- [2026-10-12 10:33] Activity #131: enhance doctor buddy explanation prompt with clinical reasoning
