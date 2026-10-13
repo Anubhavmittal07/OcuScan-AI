@@ -166,3 +166,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-12 14:46] Activity #132: benchmark Grad-CAM attribution heatmaps generation latency
 - [2026-10-12 15:31] Activity #133: validate laboratory hemoglobin ground-truth regression bounds
 - [2026-10-13 10:34] Activity #134: optimize ONNX runtime session memory footprint
+- [2026-10-13 13:54] Activity #135: add integration tests for multi-disease inference pipeline
