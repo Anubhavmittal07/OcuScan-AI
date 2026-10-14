@@ -168,3 +168,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-13 10:34] Activity #134: optimize ONNX runtime session memory footprint
 - [2026-10-13 13:54] Activity #135: add integration tests for multi-disease inference pipeline
 - [2026-10-13 16:40] Activity #136: calibrate model uncertainty scores for low-light smartphone captures
+- [2026-10-14 10:48] Activity #137: update bilingual English-Hindi medical report generator templates
