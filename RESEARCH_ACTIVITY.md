@@ -170,3 +170,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-13 16:40] Activity #136: calibrate model uncertainty scores for low-light smartphone captures
 - [2026-10-14 10:48] Activity #137: update bilingual English-Hindi medical report generator templates
 - [2026-10-14 11:44] Activity #138: run automated end-to-end clinical screening suite
+- [2026-10-15 11:37] Activity #139: benchmark Grad-CAM attribution heatmaps generation latency
