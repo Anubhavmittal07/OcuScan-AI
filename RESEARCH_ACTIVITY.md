@@ -174,3 +174,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-15 13:57] Activity #140: verify patient-level split isolation to prevent data leakage
 - [2026-10-16 14:07] Activity #141: benchmark Grad-CAM attribution heatmaps generation latency
 - [2026-10-16 19:14] Activity #142: refactor database transaction management for patient records
+- [2026-10-16 21:17] Activity #143: update clinical safety checks for conjunctival pallor preservation
