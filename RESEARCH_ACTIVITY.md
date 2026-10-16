@@ -172,3 +172,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-14 11:44] Activity #138: run automated end-to-end clinical screening suite
 - [2026-10-15 11:37] Activity #139: benchmark Grad-CAM attribution heatmaps generation latency
 - [2026-10-15 13:57] Activity #140: verify patient-level split isolation to prevent data leakage
+- [2026-10-16 14:07] Activity #141: benchmark Grad-CAM attribution heatmaps generation latency
