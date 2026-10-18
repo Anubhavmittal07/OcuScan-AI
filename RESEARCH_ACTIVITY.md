@@ -177,3 +177,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-16 21:17] Activity #143: update clinical safety checks for conjunctival pallor preservation
 - [2026-10-17 15:30] Activity #144: run automated end-to-end clinical screening suite
 - [2026-10-17 19:37] Activity #145: update bilingual English-Hindi medical report generator templates
+- [2026-10-18 10:26] Activity #146: optimize eye localization ROI cropping pipeline
