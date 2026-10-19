@@ -179,3 +179,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-17 19:37] Activity #145: update bilingual English-Hindi medical report generator templates
 - [2026-10-18 10:26] Activity #146: optimize eye localization ROI cropping pipeline
 - [2026-10-18 14:30] Activity #147: evaluate MobileNetV3-Small on conjunctivitis validation split
+- [2026-10-19 14:11] Activity #148: benchmark Grad-CAM attribution heatmaps generation latency
