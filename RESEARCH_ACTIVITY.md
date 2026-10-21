@@ -185,3 +185,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-20 14:27] Activity #151: benchmark mobile inference FPS on low-power edge devices
 - [2026-10-20 18:14] Activity #152: implement automated cross-validation on multicenter cataract manifests
 - [2026-10-21 13:53] Activity #153: validate laboratory hemoglobin ground-truth regression bounds
+- [2026-10-21 17:27] Activity #154: evaluate Bilirubin classification threshold calibration
