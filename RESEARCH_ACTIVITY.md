@@ -188,3 +188,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-21 17:27] Activity #154: evaluate Bilirubin classification threshold calibration
 - [2026-10-21 21:17] Activity #155: run automated end-to-end clinical screening suite
 - [2026-10-22 11:15] Activity #156: update illumination and blur sharpness thresholds in preprocessing
+- [2026-10-22 12:57] Activity #157: refactor database transaction management for patient records
