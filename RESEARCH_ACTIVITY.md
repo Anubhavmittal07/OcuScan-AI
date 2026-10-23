@@ -192,3 +192,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-22 21:27] Activity #158: calibrate model uncertainty scores for low-light smartphone captures
 - [2026-10-23 10:43] Activity #159: update bilingual English-Hindi medical report generator templates
 - [2026-10-23 11:18] Activity #160: evaluate Bilirubin classification threshold calibration
+- [2026-10-23 12:46] Activity #161: add integration tests for multi-disease inference pipeline
