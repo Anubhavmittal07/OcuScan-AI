@@ -196,3 +196,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-24 10:53] Activity #162: tune learning rate scheduler for ResNet50 anemia model
 - [2026-10-24 17:48] Activity #163: benchmark mobile inference FPS on low-power edge devices
 - [2026-10-24 18:40] Activity #164: calibrate model uncertainty scores for low-light smartphone captures
+- [2026-10-25 13:11] Activity #165: optimize ONNX runtime session memory footprint
