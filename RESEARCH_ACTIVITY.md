@@ -15,3 +15,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-11-10T18:57:11] Iteration #0011: Completed benchmark Grad-CAM attribution heatmaps generation latency.
 - [2026-11-07T12:21:09] Iteration #0012: Completed validate laboratory hemoglobin ground-truth regression bounds.
 - [2026-11-04T17:37:55] Iteration #0013: Completed update illumination and blur sharpness thresholds in preprocessing.
+- [2026-10-27T16:45:21] Iteration #0014: Completed optimize eye localization ROI cropping pipeline.
