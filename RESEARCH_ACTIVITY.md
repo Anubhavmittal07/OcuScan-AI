@@ -204,3 +204,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-27 11:17] Activity #170: audit clinical dataset distribution for class imbalance
 - [2026-10-27 16:39] Activity #171: run automated end-to-end clinical screening suite
 - [2026-10-28 10:57] Activity #172: implement automated cross-validation on multicenter cataract manifests
+- [2026-10-28 13:57] Activity #173: calibrate model uncertainty scores for low-light smartphone captures
