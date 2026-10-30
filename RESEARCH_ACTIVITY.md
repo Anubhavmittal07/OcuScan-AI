@@ -209,3 +209,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-29 13:04] Activity #175: update clinical safety checks for conjunctival pallor preservation
 - [2026-10-29 19:54] Activity #176: verify scleral icterus detection sensitivity across Fitzpatrick skin types
 - [2026-10-30 19:56] Activity #177: update illumination and blur sharpness thresholds in preprocessing
+- [2026-10-30 21:07] Activity #178: verify scleral icterus detection sensitivity across Fitzpatrick skin types
