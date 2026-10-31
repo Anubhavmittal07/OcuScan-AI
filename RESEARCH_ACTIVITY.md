@@ -211,3 +211,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-30 19:56] Activity #177: update illumination and blur sharpness thresholds in preprocessing
 - [2026-10-30 21:07] Activity #178: verify scleral icterus detection sensitivity across Fitzpatrick skin types
 - [2026-10-31 13:43] Activity #179: refactor database transaction management for patient records
+- [2026-10-31 20:43] Activity #180: evaluate MobileNetV3-Small on conjunctivitis validation split
