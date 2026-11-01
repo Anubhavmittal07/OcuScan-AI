@@ -214,3 +214,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-31 20:43] Activity #180: evaluate MobileNetV3-Small on conjunctivitis validation split
 - [2026-11-01 09:38] Activity #181: verify patient-level split isolation to prevent data leakage
 - [2026-11-01 17:05] Activity #182: verify patient-level split isolation to prevent data leakage
+- [2026-11-01 20:06] Activity #183: validate laboratory hemoglobin ground-truth regression bounds
