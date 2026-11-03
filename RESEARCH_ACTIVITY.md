@@ -218,3 +218,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-11-02 09:28] Activity #184: update bilingual English-Hindi medical report generator templates
 - [2026-11-02 11:26] Activity #185: validate laboratory hemoglobin ground-truth regression bounds
 - [2026-11-02 18:22] Activity #186: update bilingual English-Hindi medical report generator templates
+- [2026-11-03 13:01] Activity #187: evaluate MobileNetV3-Small on conjunctivitis validation split
