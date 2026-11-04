@@ -222,3 +222,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-11-03 18:17] Activity #188: verify scleral icterus detection sensitivity across Fitzpatrick skin types
 - [2026-11-03 19:34] Activity #189: verify scleral icterus detection sensitivity across Fitzpatrick skin types
 - [2026-11-04 10:38] Activity #190: optimize eye localization ROI cropping pipeline
+- [2026-11-04 15:46] Activity #191: validate laboratory hemoglobin ground-truth regression bounds
