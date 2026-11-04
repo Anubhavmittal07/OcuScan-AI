@@ -221,3 +221,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-11-03 13:01] Activity #187: evaluate MobileNetV3-Small on conjunctivitis validation split
 - [2026-11-03 18:17] Activity #188: verify scleral icterus detection sensitivity across Fitzpatrick skin types
 - [2026-11-03 19:34] Activity #189: verify scleral icterus detection sensitivity across Fitzpatrick skin types
+- [2026-11-04 10:38] Activity #190: optimize eye localization ROI cropping pipeline
