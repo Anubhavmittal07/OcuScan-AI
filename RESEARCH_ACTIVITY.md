@@ -31,3 +31,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-10-26T18:55:15] Iteration #0027: Completed evaluate Bilirubin classification threshold calibration.
 - [2026-11-01T12:08:54] Iteration #0028: Completed refactor database transaction management for patient records.
 - [2026-11-09T13:26:59] Iteration #0029: Completed refactor database transaction management for patient records.
+- [2026-11-07T10:47:10] Iteration #0030: Completed verify patient-level split isolation to prevent data leakage.
