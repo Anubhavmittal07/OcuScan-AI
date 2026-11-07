@@ -229,3 +229,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-11-05 16:01] Activity #195: update clinical safety checks for conjunctival pallor preservation
 - [2026-11-06 14:33] Activity #196: benchmark mobile inference FPS on low-power edge devices
 - [2026-11-06 21:20] Activity #197: verify scleral icterus detection sensitivity across Fitzpatrick skin types
+- [2026-11-07 09:25] Activity #198: evaluate MobileNetV3-Small on conjunctivitis validation split
