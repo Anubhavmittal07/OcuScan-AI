@@ -234,3 +234,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-11-07 18:44] Activity #200: verify patient-level split isolation to prevent data leakage
 - [2026-11-08 15:49] Activity #201: optimize eye localization ROI cropping pipeline
 - [2026-11-08 19:13] Activity #202: update bilingual English-Hindi medical report generator templates
+- [2026-11-08 20:08] Activity #203: benchmark Grad-CAM attribution heatmaps generation latency
