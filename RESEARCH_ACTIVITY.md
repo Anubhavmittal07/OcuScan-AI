@@ -237,3 +237,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-11-08 20:08] Activity #203: benchmark Grad-CAM attribution heatmaps generation latency
 - [2026-11-09 09:01] Activity #204: tune learning rate scheduler for ResNet50 anemia model
 - [2026-11-09 10:33] Activity #205: refactor database transaction management for patient records
+- [2026-11-09 11:48] Activity #206: evaluate MobileNetV3-Small on conjunctivitis validation split
