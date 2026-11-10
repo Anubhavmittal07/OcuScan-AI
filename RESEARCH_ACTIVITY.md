@@ -239,3 +239,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-11-09 10:33] Activity #205: refactor database transaction management for patient records
 - [2026-11-09 11:48] Activity #206: evaluate MobileNetV3-Small on conjunctivitis validation split
 - [2026-11-10 16:47] Activity #207: update clinical safety checks for conjunctival pallor preservation
+- [2026-11-10 17:49] Activity #208: calibrate model uncertainty scores for low-light smartphone captures
