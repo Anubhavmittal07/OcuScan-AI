@@ -244,3 +244,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-11-11 16:39] Activity #210: validate laboratory hemoglobin ground-truth regression bounds
 - [2026-11-12 11:45] Activity #211: run automated end-to-end clinical screening suite
 - [2026-11-12 15:07] Activity #212: verify patient-level split isolation to prevent data leakage
+- [2026-11-12 20:11] Activity #213: optimize eye localization ROI cropping pipeline
