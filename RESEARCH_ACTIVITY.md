@@ -246,3 +246,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-11-12 15:07] Activity #212: verify patient-level split isolation to prevent data leakage
 - [2026-11-12 20:11] Activity #213: optimize eye localization ROI cropping pipeline
 - [2026-11-13 17:32] Activity #214: update illumination and blur sharpness thresholds in preprocessing
+- [2026-11-13 19:42] Activity #215: update illumination and blur sharpness thresholds in preprocessing
