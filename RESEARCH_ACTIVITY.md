@@ -245,3 +245,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-11-12 11:45] Activity #211: run automated end-to-end clinical screening suite
 - [2026-11-12 15:07] Activity #212: verify patient-level split isolation to prevent data leakage
 - [2026-11-12 20:11] Activity #213: optimize eye localization ROI cropping pipeline
+- [2026-11-13 17:32] Activity #214: update illumination and blur sharpness thresholds in preprocessing
