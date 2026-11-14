@@ -248,3 +248,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-11-13 17:32] Activity #214: update illumination and blur sharpness thresholds in preprocessing
 - [2026-11-13 19:42] Activity #215: update illumination and blur sharpness thresholds in preprocessing
 - [2026-11-13 20:19] Activity #216: add integration tests for multi-disease inference pipeline
+- [2026-11-14 11:41] Activity #217: update illumination and blur sharpness thresholds in preprocessing
