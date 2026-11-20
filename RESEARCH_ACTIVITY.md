@@ -453,3 +453,5 @@ Clinical Computer Vision Screening Research & Validation Log
 <!-- PR milestone: docs: add medical terminology glossary for ocular pallor -->
 
 <!-- PR milestone: test(harness): ensure mock session teardown cleanliness -->
+
+<!-- PR milestone: docs: finalize multi-target clinical architecture overview -->
