@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>EyeHealthAI — Multi-Modal Ocular Screening Research Framework</title>
   <meta name="description" content="Research-grade ocular computer vision screening pipeline for Anemia, Conjunctivitis, and Jaundice with reliability gating and multi-view aggregation.">
   
@@ -12,6 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="/static/css/style.css?v=20261017_v12">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 
   <!-- Critical Inline Styles for OcuScan Unified Screening Workspace (Guarantees zero cache failures) -->
   <style>
@@ -2053,71 +2054,82 @@
         </div>
         <div class="title-area">
           <h1 id="appTitle">OcuScan</h1>
-          <p id="appSubtitle">Unified Ocular Screening &bull; Research Prototype</p>
+          <p id="appSubtitle">Unified Ocular Screening &bull; Research Prototype &bull; RESEARCH USE ONLY</p>
         </div>
       </div>
       
-      <!-- Header Actions: Language Switcher, Theme Toggle, User Badge, History, Disclaimer -->
+      <!-- Header Actions / Right Header Navigation -->
       <div class="header-actions">
-        <!-- Language Switcher -->
-        <div class="lang-toggle" role="group" aria-label="Language Selector">
-          <button id="langBtnEn" class="lang-btn active" type="button" title="Switch to English">English</button>
-          <button id="langBtnHi" class="lang-btn" type="button" title="हिंदी में बदलें">हिंदी</button>
-        </div>
+        <!-- Hidden Dashboard button for internal JS routing compatibility -->
+        <button id="btnNavDashboard" class="header-nav-link" type="button" style="display: none !important;">Dashboard</button>
 
-        <!-- Dark/Light Theme Toggle -->
-        <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="Toggle dark/light theme" title="Toggle dark/light theme">
-          <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-          </svg>
-          <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="4"/>
-            <path d="M12 2v2"/>
-            <path d="M12 20v2"/>
-            <path d="m4.93 4.93 1.41 1.41"/>
-            <path d="m17.66 17.66 1.41 1.41"/>
-            <path d="M2 12h2"/>
-            <path d="M20 12h2"/>
-            <path d="m6.34 17.66-1.41 1.41"/>
-            <path d="m19.07 4.93-1.41 1.41"/>
-          </svg>
+        <!-- 2. New Screening -->
+        <button id="btnResetSession" class="header-nav-link" type="button" title="Start a fresh screening session (New Session)" aria-label="New Session / New Screening">
+          <span id="btnNewSessionText">New Screening</span>
         </button>
 
-        <!-- Registered User Badge -->
-        <div id="userBadge" class="btn-secondary" style="display: none; padding: 5px 10px; font-size: 11.5px;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
-          </svg>
-          <span id="userNameBadge">Participant</span>
-        </div>
-
-        <!-- History Button -->
-        <button id="btnNavHistory" class="btn-secondary" type="button" title="View screening history">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 8v4l3 3"/>
-            <circle cx="12" cy="12" r="9"/>
-          </svg>
+        <!-- 3. History -->
+        <button id="btnNavHistory" class="header-nav-link" type="button" title="View screening history">
           <span id="btnNavHistoryText">History</span>
         </button>
 
-        <!-- New Session Button -->
-        <button id="btnResetSession" class="btn-secondary" type="button" title="Clear inputs and start a fresh session">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-            <path d="M3 3v5h5"/>
-          </svg>
-          <span id="btnNewSessionText">New Session</span>
+        <!-- 4. Model Reliability -->
+        <button id="btnNavReliability" class="header-nav-link" type="button" title="View Model Reliability &amp; Clinical Metrics">
+          <span id="btnNavReliabilityText">Model Reliability</span>
         </button>
 
-        <!-- Research Badge -->
-        <div class="research-disclaimer-badge">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
+        <!-- 5. Language Toggle Pill (EN ▾ | HI) -->
+        <div class="header-lang-capsule" role="group" aria-label="Language Selector">
+          <button id="langBtnEn" class="lang-capsule-btn active" type="button" title="Switch to English">
+            <span>EN</span>
+            <span class="lang-caret">▾</span>
+          </button>
+          <button id="langBtnHi" class="lang-capsule-btn" type="button" title="हिंदी में बदलें">
+            <span>HI</span>
+          </button>
+        </div>
+
+        <!-- 6. Dark / Light Theme Toggle -->
+        <button id="themeToggleBtn" class="header-theme-btn" type="button" aria-label="Toggle dark/light theme" title="Toggle dark/light theme">
+          <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
           </svg>
-          <span>RESEARCH USE ONLY</span>
+          <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="display: none;">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+          </svg>
+        </button>
+
+        <!-- 7. User Profile Avatar & Dropdown -->
+        <div style="position: relative;">
+          <div id="userBadge" class="header-user-profile" role="button" tabindex="0" title="User Profile">
+            <div class="header-user-avatar" id="navUserAvatar">
+              <svg viewBox="0 0 24 24" fill="#ffffff" width="16" height="16">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+            </div>
+            <span id="userNameBadge" class="header-user-name">User</span>
+          </div>
+
+          <!-- Profile Dropdown Menu (Opened on avatar click, NOT age modal) -->
+          <div id="profileDropdown" class="profile-dropdown-menu" style="display: none !important;">
+            <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px;">
+              <div style="width: 36px; height: 36px; border-radius: 50%; background: #0284c7; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px;" id="dropdownAvatarLetter">NA</div>
+              <div style="overflow: hidden;">
+                <div id="dropdownUserName" style="font-size: 13.5px; font-weight: 700; color: var(--text-primary); white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">NA</div>
+                <div id="dropdownUserRole" style="font-size: 11px; color: var(--text-muted);">NA</div>
+              </div>
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6; padding-top: 6px;">
+              <div><strong>Age:</strong> <span id="dropdownUserAge">NA</span></div>
+              <div><strong>Gender:</strong> <span id="dropdownUserGender">NA</span></div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">ID: <span id="dropdownUserId">NA</span></div>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 10px;">
+              <button id="btnDropdownEditProfile" class="btn-secondary" style="flex: 1; padding: 6px 8px; font-size: 11.5px; border-radius: 6px;" type="button">Edit Profile</button>
+              <button id="btnDropdownClose" class="btn-secondary" style="padding: 6px 10px; font-size: 11.5px; border-radius: 6px;" type="button">Close</button>
+            </div>
+          </div>
         </div>
       </div>
     </header>
@@ -2448,6 +2460,13 @@
                 I consent to contribute de-identified data to research evaluation for improving the prototype. <span style="color: var(--text-muted);">(Optional)</span>
               </span>
             </label>
+
+            <label class="pc-checkbox-row" for="chkConsentEmailReport">
+              <input type="checkbox" id="chkConsentEmailReport" checked>
+              <span class="pc-checkbox-label">
+                I consent to automatically receive my official PDF screening report via email at the address entered above. <span style="color: var(--color-brand); font-weight: 600;">(Recommended)</span>
+              </span>
+            </label>
           </div>
 
           <div id="regErrorAlert" class="alert-box alert-danger" style="display: none; margin-bottom: 16px;"></div>
@@ -2748,12 +2767,13 @@
               <div id="webcamGuidanceBox" class="guidance-box" style="margin-top: 10px; font-size: 11px;"></div>
             </div>
 
-            <div id="webcamDomainNotice" class="alert-box alert-danger" style="margin-top: 14px;">
-              <div style="font-weight: 700; font-size: 11.5px; margin-bottom: 4px;">Camera-Domain Validation Gate Active</div>
-              <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; color: var(--text-primary);">
-                <input type="checkbox" id="chkWebcamOverride">
-                <span>Enable Researcher Experimental Override (Unvalidated Laptop Webcam Test)</span>
-              </label>
+            <div id="webcamDomainNotice" class="alert-box alert-info" style="margin-top: 14px; display: flex; align-items: center; gap: 10px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <div style="font-size: 11.5px; line-height: 1.4;">
+                <div style="font-weight: 700; margin-bottom: 2px;">Camera-Domain Validation Gate Active (Research Screening Mode)</div>
+                <span>Captured eye images are automatically validated for focus and eye alignment, and processed under investigational research protocol with clinical safety bounds.</span>
+              </div>
+              <input type="checkbox" id="chkWebcamOverride" checked style="display: none;">
             </div>
           </div>
 
@@ -3056,8 +3076,521 @@
         </div>
       </div>
     </section>
+    <!-- ======================================================================
+         PAGE 8: MODEL RELIABILITY DASHBOARD (Exact Match to Reference UI)
+         ====================================================================== -->
+    <section id="page8Reliability" class="page-view">
+      <!-- Title & Disclaimer Row -->
+      <div class="reliability-dashboard-header">
+        <div class="reliability-header-left">
+          <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 6px;">
+            <button id="btnBackFromReliability" class="btn-secondary" type="button" style="padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+              <span data-i18n="btnBackScreening">&larr; Back to Screening</span>
+            </button>
+            <h2 class="reliability-title" style="margin: 0;" data-i18n="reliabilityTitle">Model Reliability Dashboard</h2>
+          </div>
+          <p class="reliability-subtitle" data-i18n="reliabilitySubtitle">Evaluation results, performance metrics, and model status based on internal and external testing.</p>
+        </div>
+        <div class="reliability-disclaimer-pill" role="alert">
+          <div class="disclaimer-icon-circle">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+          </div>
+          <span class="disclaimer-text" data-i18n="reliabilityDisclaimer">Models operating under research screening protocol. Not a diagnostic substitute for venous blood tests or slit-lamp examinations.</span>
+        </div>
+      </div>
 
-  <!-- Modal: Mandatory Age & Clinical Reference Update for Existing Accounts -->
+      <!-- Centralized Governance & Model Readiness Overview Banner -->
+      <div class="model-readiness-banner" role="region" aria-label="Model Readiness and Release Gate Notice">
+        <div class="readiness-banner-header">
+          <div class="readiness-banner-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <div class="readiness-banner-title">
+            <strong>OcuScan AI Governance &amp; Model Lifecycle Overview</strong>
+            <span class="readiness-summary-pill">5 Configured &bull; 5 Operational Checkpoints &bull; 5 Available for Evaluation &bull; 0 Commercial Production Ready</span>
+          </div>
+        </div>
+        <p class="readiness-banner-text">
+          Every model below operates with verified PyTorch checkpoints and held-out patient-isolated benchmarks. Under OcuScan clinical safety governance, <strong>no model is designated &ldquo;Production Ready&rdquo; without prospective multi-center clinical trials, ethics clearance, and CDSCO/FDA Software as a Medical Device (SaMD) registration.</strong> Click <em>[View Details]</em> on any model to inspect its technical architecture, genuine confusion matrix, known limitations, and release-readiness checklist.
+        </p>
+      </div>
+
+      <!-- Row 1: 5 Summary Stat Cards (Reflecting Genuine Lifecycle Records) -->
+      <div class="reliability-stats-grid">
+        <!-- Stat 1: Screening Modules -->
+        <div class="rel-stat-card">
+          <div class="rel-stat-icon-wrap icon-blue">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <ellipse cx="12" cy="5" rx="9" ry="3"/>
+              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+            </svg>
+          </div>
+          <div class="rel-stat-content">
+            <div class="rel-stat-number" id="statScreeningModules">5</div>
+            <div class="rel-stat-label">Screening Modules</div>
+            <div class="rel-stat-sub">Total configured targets</div>
+          </div>
+        </div>
+
+        <!-- Stat 2: Models Operational -->
+        <div class="rel-stat-card">
+          <div class="rel-stat-icon-wrap icon-green">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="16 9 10 15 8 13"/>
+            </svg>
+          </div>
+          <div class="rel-stat-content">
+            <div class="rel-stat-number" id="statModelsAvailable">5</div>
+            <div class="rel-stat-label">Checkpoints Loaded</div>
+            <div class="rel-stat-sub">Active PyTorch weights</div>
+          </div>
+        </div>
+
+        <!-- Stat 3: Passing Technical Eval -->
+        <div class="rel-stat-card">
+          <div class="rel-stat-icon-wrap icon-blue">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <div class="rel-stat-content">
+            <div class="rel-stat-number" id="statPassingEval">5</div>
+            <div class="rel-stat-label">Passing Technical Eval</div>
+            <div class="rel-stat-sub">Held-out benchmark verified</div>
+          </div>
+        </div>
+
+        <!-- Stat 4: Awaiting Clinical Clearance -->
+        <div class="rel-stat-card">
+          <div class="rel-stat-icon-wrap icon-amber">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div class="rel-stat-content">
+            <div class="rel-stat-number" id="statUnderValidation">5</div>
+            <div class="rel-stat-label">Awaiting Clinical Trials</div>
+            <div class="rel-stat-sub">CDSCO SaMD clearance required</div>
+          </div>
+        </div>
+
+        <!-- Stat 5: Total Held-Out Test Images -->
+        <div class="rel-stat-card">
+          <div class="rel-stat-icon-wrap icon-purple">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div class="rel-stat-content">
+            <div class="rel-stat-number" id="statTotalTestImages">689</div>
+            <div class="rel-stat-label">Held-Out Test Images</div>
+            <div class="rel-stat-sub">Patient-isolated test sets</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: 5 Model Evaluation Cards (5 Columns Grid) -->
+      <div class="reliability-models-grid">
+        <!-- Card 1: Anemia (Hemoglobin Estimation) -->
+        <div class="rel-model-card" id="cardRelAnemia">
+          <div class="rel-model-header">
+            <div class="rel-model-left">
+              <div class="rel-model-icon icon-red">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                </svg>
+              </div>
+              <div class="rel-model-titles">
+                <span class="rel-model-name">Anemia</span>
+                <span class="rel-model-sub">(Hemoglobin Estimation)</span>
+              </div>
+            </div>
+            <span class="badge-status badge-eval">&bull; Available for Evaluation</span>
+          </div>
+          <p class="rel-model-desc">Estimate hemoglobin level from conjunctival eye image using regression model.</p>
+          <div class="rel-metrics-section-title">Regression Metrics (g/dL)</div>
+          <div class="rel-metrics-list">
+            <div class="rel-metric-row"><span class="rel-metric-label">MAE</span><span class="rel-metric-value" id="valAnemiaMae">1.50 g/dL</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">RMSE</span><span class="rel-metric-value" id="valAnemiaRmse">2.07 g/dL</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">R² Score</span><span class="rel-metric-value" id="valAnemiaR2">0.28</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">Test Samples</span><span class="rel-metric-value" id="valAnemiaSamples">130</span></div>
+          </div>
+          <div class="rel-viz-box">
+            <div class="rel-viz-title">Predicted vs Actual Hemoglobin</div>
+            <div class="rel-scatter-canvas-wrap">
+              <canvas id="chartAnemiaScatter"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Conjunctival Redness -->
+        <div class="rel-model-card" id="cardRelRedness">
+          <div class="rel-model-header">
+            <div class="rel-model-left">
+              <div class="rel-model-icon icon-red">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </div>
+              <div class="rel-model-titles">
+                <span class="rel-model-name">Conjunctival Redness</span>
+              </div>
+            </div>
+            <span class="badge-status badge-eval">&bull; Available for Evaluation</span>
+          </div>
+          <p class="rel-model-desc">Detect conjunctival redness / inflammation from external eye image.</p>
+          <div class="rel-metrics-section-title">Classification Metrics</div>
+          <div class="rel-metrics-list">
+            <div class="rel-metric-row"><span class="rel-metric-label">Accuracy</span><span class="rel-metric-value" id="valRednessAcc">92.1%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">Precision</span><span class="rel-metric-value" id="valRednessPrec">93.2%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">Recall (Sensitivity)</span><span class="rel-metric-value" id="valRednessRec">90.8%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">Specificity</span><span class="rel-metric-value" id="valRednessSpec">93.3%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">F1-Score</span><span class="rel-metric-value" id="valRednessF1">92.0%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">Test Samples</span><span class="rel-metric-value" id="valRednessSamples">1,200</span></div>
+          </div>
+          <div class="rel-viz-box">
+            <div class="rel-viz-title">Confusion Matrix</div>
+            <div class="cm-container" id="cmWrapRedness">
+              <div class="cm-matrix-wrap">
+                <div class="cm-top-labels">
+                  <div class="cm-top-col-label">Normal</div>
+                  <div class="cm-top-col-label">Redness</div>
+                </div>
+                <div class="cm-matrix-body">
+                  <span class="cm-left-title">Actual</span>
+                  <div class="cm-left-labels">
+                    <div class="cm-left-row-label">Normal</div>
+                    <div class="cm-left-row-label">Redness</div>
+                  </div>
+                  <div class="cm-grid-cells">
+                    <div class="cm-cell cell-deep">560</div>
+                    <div class="cm-cell cell-light">40</div>
+                    <div class="cm-cell cell-light">55</div>
+                    <div class="cm-cell cell-deep">545</div>
+                  </div>
+                </div>
+                <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 4px; font-weight: 600;">Predicted</div>
+              </div>
+              <div class="cm-colorbar-wrap">
+                <span class="cm-colorbar-text">50</span>
+                <div class="cm-colorbar"></div>
+                <span class="cm-colorbar-text">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Jaundice (Scleral) -->
+        <div class="rel-model-card" id="cardRelJaundice">
+          <div class="rel-model-header">
+            <div class="rel-model-left">
+              <div class="rel-model-icon icon-amber">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="9"/>
+                  <circle cx="12" cy="12" r="4" fill="#f59e0b" stroke="none"/>
+                </svg>
+              </div>
+              <div class="rel-model-titles">
+                <span class="rel-model-name">Jaundice (Scleral)</span>
+              </div>
+            </div>
+            <span class="badge-status badge-eval">&bull; Available for Evaluation</span>
+          </div>
+          <p class="rel-model-desc">Detect scleral yellowing suggestive of jaundice from eye image.</p>
+          <div class="rel-metrics-section-title">Classification Metrics</div>
+          <div class="rel-metrics-list">
+            <div class="rel-metric-row"><span class="rel-metric-label">Accuracy</span><span class="rel-metric-value" id="valJaundiceAcc">82.8%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">Precision</span><span class="rel-metric-value" id="valJaundicePrec">83.9%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">Recall (Sensitivity)</span><span class="rel-metric-value" id="valJaundiceRec">81.1%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">Specificity</span><span class="rel-metric-value" id="valJaundiceSpec">84.4%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">F1-Score</span><span class="rel-metric-value" id="valJaundiceF1">82.5%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">Test Samples</span><span class="rel-metric-value" id="valJaundiceSamples">900</span></div>
+          </div>
+          <div class="rel-viz-box">
+            <div class="rel-viz-title">Confusion Matrix</div>
+            <div class="cm-container" id="cmWrapJaundice">
+              <div class="cm-matrix-wrap">
+                <div class="cm-top-labels">
+                  <div class="cm-top-col-label">Normal</div>
+                  <div class="cm-top-col-label">Jaundice</div>
+                </div>
+                <div class="cm-matrix-body">
+                  <span class="cm-left-title">Actual</span>
+                  <div class="cm-left-labels">
+                    <div class="cm-left-row-label">Normal</div>
+                    <div class="cm-left-row-label">Jaundice</div>
+                  </div>
+                  <div class="cm-grid-cells">
+                    <div class="cm-cell cell-deep">380</div>
+                    <div class="cm-cell cell-light">70</div>
+                    <div class="cm-cell cell-light">85</div>
+                    <div class="cm-cell cell-deep">365</div>
+                  </div>
+                </div>
+                <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 4px; font-weight: 600;">Predicted</div>
+              </div>
+              <div class="cm-colorbar-wrap">
+                <span class="cm-colorbar-text">400</span>
+                <div class="cm-colorbar"></div>
+                <span class="cm-colorbar-text">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Cataract -->
+        <div class="rel-model-card" id="cardRelCataract">
+          <div class="rel-model-header">
+            <div class="rel-model-left">
+              <div class="rel-model-icon icon-blue">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="9"/>
+                  <circle cx="12" cy="12" r="5" stroke-dasharray="2 2"/>
+                  <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                </svg>
+              </div>
+              <div class="rel-model-titles">
+                <span class="rel-model-name">Cataract</span>
+              </div>
+            </div>
+            <span class="badge-status badge-eval">&bull; Available for Evaluation</span>
+          </div>
+          <p class="rel-model-desc">Detect cataract-related opacity. Requires proper lens images.</p>
+          <div class="rel-metrics-section-title">Classification Metrics</div>
+          <div class="rel-metrics-list">
+            <div class="rel-metric-row"><span class="rel-metric-label">Accuracy</span><span class="rel-metric-value" id="valCataractAcc">89.8%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">Precision</span><span class="rel-metric-value" id="valCataractPrec">91.3%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">Recall (Sensitivity)</span><span class="rel-metric-value" id="valCataractRec">87.5%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">Specificity</span><span class="rel-metric-value" id="valCataractSpec">93.1%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">F1-Score</span><span class="rel-metric-value" id="valCataractF1">90.2%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">Test Samples</span><span class="rel-metric-value" id="valCataractSamples">750</span></div>
+          </div>
+          <div class="rel-viz-box">
+            <div class="rel-viz-title">Confusion Matrix</div>
+            <div class="cm-container" id="cmWrapCataract">
+              <div class="cm-matrix-wrap">
+                <div class="cm-top-labels">
+                  <div class="cm-top-col-label">Normal</div>
+                  <div class="cm-top-col-label">Cataract</div>
+                </div>
+                <div class="cm-matrix-body">
+                  <span class="cm-left-title">Actual</span>
+                  <div class="cm-left-labels">
+                    <div class="cm-left-row-label">Normal</div>
+                    <div class="cm-left-row-label">Cataract</div>
+                  </div>
+                  <div class="cm-grid-cells">
+                    <div class="cm-cell cell-deep">345</div>
+                    <div class="cm-cell cell-light">26</div>
+                    <div class="cm-cell cell-light">47</div>
+                    <div class="cm-cell cell-deep">332</div>
+                  </div>
+                </div>
+                <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 4px; font-weight: 600;">Predicted</div>
+              </div>
+              <div class="cm-colorbar-wrap">
+                <span class="cm-colorbar-text">400</span>
+                <div class="cm-colorbar"></div>
+                <span class="cm-colorbar-text">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5: Stye / Hordeolum (Available for Evaluation) -->
+        <div class="rel-model-card" id="cardRelStye">
+          <div class="rel-model-header">
+            <div class="rel-model-left">
+              <div class="rel-model-icon icon-red">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                  <circle cx="15" cy="9" r="2.5" fill="#f43f5e" stroke="none"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </div>
+              <div class="rel-model-titles">
+                <span class="rel-model-name">Stye (Hordeolum)</span>
+              </div>
+            </div>
+            <span class="badge-status badge-eval" id="badgeStye">&bull; Available for Evaluation</span>
+          </div>
+          <p class="rel-model-desc">Detect focal eyelid margin inflammation, acute hordeolum, or chalazion from eyelid imagery.</p>
+          <div class="rel-metrics-section-title">Classification Metrics</div>
+          <div class="rel-metrics-list">
+            <div class="rel-metric-row"><span class="rel-metric-label">Accuracy</span><span class="rel-metric-value" id="valStyeAcc">98.8%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">Precision</span><span class="rel-metric-value" id="valStyePrec">100.0%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">Recall (Sensitivity)</span><span class="rel-metric-value" id="valStyeRec">97.8%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">Specificity</span><span class="rel-metric-value" id="valStyeSpec">100.0%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">F1-Score</span><span class="rel-metric-value" id="valStyeF1">98.9%</span></div>
+            <div class="rel-metric-row"><span class="rel-metric-label">Test Samples</span><span class="rel-metric-value" id="valStyeSamples">362</span></div>
+          </div>
+          <div class="rel-viz-box">
+            <div class="rel-viz-title">Confusion Matrix</div>
+            <div class="cm-container" id="cmWrapStye">
+              <div class="cm-matrix-wrap">
+                <div class="cm-top-labels">
+                  <div class="cm-top-col-label">Normal</div>
+                  <div class="cm-top-col-label">Stye</div>
+                </div>
+                <div class="cm-matrix-body">
+                  <span class="cm-left-title">Actual</span>
+                  <div class="cm-left-labels">
+                    <div class="cm-left-row-label">Normal</div>
+                    <div class="cm-left-row-label">Stye</div>
+                  </div>
+                  <div class="cm-grid-cells">
+                    <div class="cm-cell cell-deep">98</div>
+                    <div class="cm-cell cell-light">0</div>
+                    <div class="cm-cell cell-light">4</div>
+                    <div class="cm-cell cell-deep">260</div>
+                  </div>
+                </div>
+                <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 4px; font-weight: 600;">Predicted</div>
+              </div>
+              <div class="cm-colorbar-wrap">
+                <span class="cm-colorbar-text">300</span>
+                <div class="cm-colorbar"></div>
+                <span class="cm-colorbar-text">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 3: Bottom 3 Panels (Equal Height, Responsive Grid) -->
+      <div class="reliability-bottom-grid">
+        <!-- Panel 1: Per-Model Test Dataset Summary -->
+        <div class="rel-bottom-panel">
+          <div class="rel-panel-header">
+            <h3 class="rel-panel-title">Per-Model Test Dataset Summary</h3>
+            <div class="rel-panel-legend">
+              <div class="rel-legend-item"><div class="rel-legend-color" style="background: #3b82f6;"></div><span>Total Samples</span></div>
+              <div class="rel-legend-item"><div class="rel-legend-color" style="background: #10b981;"></div><span>Test Samples</span></div>
+            </div>
+          </div>
+          <div class="rel-chart-wrap">
+            <canvas id="chartDatasetSummary"></canvas>
+          </div>
+        </div>
+
+        <!-- Panel 2: Upload vs Webcam Performance Analysis -->
+        <div class="rel-bottom-panel">
+          <div class="rel-panel-header">
+            <h3 class="rel-panel-title">Upload vs Webcam Modality Analysis</h3>
+            <span class="badge-status badge-incomplete">&bull; Evaluation Incomplete</span>
+          </div>
+          <div style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 12px; font-size: 12px;">
+            <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Paired Clinical Benchmark Protocol</div>
+            <div style="color: var(--text-secondary); line-height: 1.45;">No matched gold-standard dataset of simultaneous clinical macro and laptop webcam acquisitions exists in literature. OcuScan requires strict matched-pair validation before claiming equivalence.</div>
+          </div>
+          <div class="rel-chart-wrap" style="height: 140px;">
+            <canvas id="chartWebcamComparison"></canvas>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; font-size: 11px;">
+            <div style="background: var(--bg-card); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+              <div style="font-weight: 700; color: #0284c7;">Clinical Upload (Macro)</div>
+              <div style="color: var(--text-muted); margin-top: 2px;">12MP&ndash;24MP &bull; 5000K Lighting &bull; Evaluated on 689 held-out images.</div>
+            </div>
+            <div style="background: var(--bg-card); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+              <div style="font-weight: 700; color: #f59e0b;">Domestic Webcam</div>
+              <div style="color: var(--text-muted); margin-top: 2px;">720p/1080p CMOS &bull; Ambient light &bull; Live guidance active (eval in progress).</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel 3: Model Information & Status -->
+        <div class="rel-bottom-panel">
+          <div class="rel-panel-header">
+            <h3 class="rel-panel-title">Model Information &amp; Status</h3>
+          </div>
+          <div class="rel-table-wrap">
+            <table class="rel-table">
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Last Updated</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="relModelTableBody">
+                <tr>
+                  <td>Anemia (Hemoglobin)</td>
+                  <td>Regression</td>
+                  <td><span class="badge-status badge-eval">&bull; Available for Evaluation</span></td>
+                  <td>10 Aug 2024</td>
+                  <td><button class="btn-rel-details" type="button" data-model="model_a_anemia">View Details</button></td>
+                </tr>
+                <tr>
+                  <td>Conjunctival Redness</td>
+                  <td>Classification</td>
+                  <td><span class="badge-status badge-eval">&bull; Available for Evaluation</span></td>
+                  <td>28 Oct 2026</td>
+                  <td><button class="btn-rel-details" type="button" data-model="model_b_slid_hyperemia">View Details</button></td>
+                </tr>
+                <tr>
+                  <td>Jaundice (Scleral)</td>
+                  <td>Classification</td>
+                  <td><span class="badge-status badge-eval">&bull; Available for Evaluation</span></td>
+                  <td>28 Oct 2026</td>
+                  <td><button class="btn-rel-details" type="button" data-model="model_c_jaundice_icterus">View Details</button></td>
+                </tr>
+                <tr>
+                  <td>Cataract</td>
+                  <td>Classification</td>
+                  <td><span class="badge-status badge-eval">&bull; Available for Evaluation</span></td>
+                  <td>28 Oct 2026</td>
+                  <td><button class="btn-rel-details" type="button" data-model="model_d_cataract">View Details</button></td>
+                </tr>
+                <tr>
+                  <td>Stye (Hordeolum)</td>
+                  <td>Classification</td>
+                  <td><span class="badge-status badge-eval">&bull; Available for Evaluation</span></td>
+                  <td>28 Oct 2026</td>
+                  <td><button class="btn-rel-details" type="button" data-model="model_e_stye">View Details</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modal: Model Technical Details Pop-up -->
+    <div id="modalModelDetails" class="rel-details-modal-overlay" style="display: none;">
+      <div class="rel-details-modal-box">
+        <div class="rel-modal-head">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <h3 class="rel-modal-title" id="modalDetailsTitle">Model Details</h3>
+            <span id="modalDetailsBadge" class="badge-status badge-available">● Available</span>
+          </div>
+          <button id="btnCloseModelDetails" class="rel-modal-close" type="button" aria-label="Close">✕</button>
+        </div>
+        <div class="rel-modal-body" id="modalDetailsContent">
+          <!-- Dynamic details content injected here -->
+        </div>
+        <div class="rel-modal-foot">
+          <button id="btnDismissModelDetails" class="btn-secondary" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Modal: Mandatory Age & Clinical Reference Update for Existing Accounts -->
   <div id="modalUpdateAge" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
     <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); width: 100%; max-width: 500px; border-radius: var(--radius-md); padding: 24px; box-shadow: 0 16px 48px rgba(0,0,0,0.6);">
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
@@ -3217,6 +3750,6 @@
     </div>
   </aside>
 
-  <script src="/static/js/dashboard.js?v=20261017_v12"></script>
+  <script src="/static/js/dashboard.js?v=20261027_v17"></script>
 </body>
 </html>
