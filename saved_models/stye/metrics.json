@@ -1,61 +1,85 @@
 {
   "disease": "Stye / Hordeolum",
   "architecture": "MobileNetV3-Small",
-  "dataset": "Roboflow Stye/Hordeolum paired with Normal Ocular Controls",
+  "dataset": "Roboflow Eye Dataset (Stye + Healthy + Blepharitis)",
   "modality": "Anterior Eyelid / Ocular Photography",
-  "total_images": 2335,
-  "unique_subjects": 1145,
+  "license": "CC BY 4.0 (Yudis Project)",
+  "total_images": 4586,
+  "unique_subjects": 1777,
   "subject_isolated_split": {
-    "train_subjects": 801,
-    "val_subjects": 171,
-    "test_subjects": 173,
-    "train_images": 1621,
-    "val_images": 352,
-    "test_images": 362
+    "train_subjects": 1244,
+    "val_subjects": 266,
+    "test_subjects": 267,
+    "train_images": 3206,
+    "val_images": 710,
+    "test_images": 670
   },
   "validation_metrics": {
-    "accuracy": 1.0,
-    "precision": 1.0,
-    "recall_sensitivity": 1.0,
-    "specificity": 1.0,
-    "f1_score": 1.0,
-    "roc_auc": 1.0,
+    "accuracy": 0.9225352112676056,
+    "precision": 0.8772563176895307,
+    "recall_sensitivity": 0.9204545454545454,
+    "specificity": 0.9237668161434978,
+    "f1_score": 0.8983364140480592,
+    "roc_auc": 0.9754807038999865,
     "confusion_matrix": [
       [
-        97,
-        0
+        412,
+        34
       ],
       [
-        0,
-        255
+        21,
+        243
       ]
     ],
-    "true_negatives": 97,
-    "false_positives": 0,
-    "false_negatives": 0,
-    "true_positives": 255
+    "true_negatives": 412,
+    "false_positives": 34,
+    "false_negatives": 21,
+    "true_positives": 243
   },
   "test_metrics": {
-    "accuracy": 1.0,
-    "precision": 1.0,
-    "recall_sensitivity": 1.0,
-    "specificity": 1.0,
-    "f1_score": 1.0,
-    "roc_auc": 1.0,
+    "accuracy": 0.9388059701492537,
+    "precision": 0.9045643153526971,
+    "recall_sensitivity": 0.923728813559322,
+    "specificity": 0.9470046082949308,
+    "f1_score": 0.9140461215932913,
+    "roc_auc": 0.985110911505116,
     "confusion_matrix": [
       [
-        98,
-        0
+        411,
+        23
       ],
       [
-        0,
-        264
+        18,
+        218
       ]
     ],
-    "true_negatives": 98,
-    "false_positives": 0,
-    "false_negatives": 0,
-    "true_positives": 264
+    "true_negatives": 411,
+    "false_positives": 23,
+    "false_negatives": 18,
+    "true_positives": 218
   },
-  "training_duration_seconds": 1948.59
+  "subcategory_breakdown": {
+    "stye": {
+      "total": 236,
+      "correct": 218,
+      "incorrect": 18,
+      "accuracy": 0.923728813559322,
+      "mean_stye_probability": 0.9108967440660601
+    },
+    "healthy": {
+      "total": 213,
+      "correct": 207,
+      "incorrect": 6,
+      "accuracy": 0.971830985915493,
+      "mean_stye_probability": 0.03726433301739674
+    },
+    "blepharitis": {
+      "total": 221,
+      "correct": 204,
+      "incorrect": 17,
+      "accuracy": 0.9230769230769231,
+      "mean_stye_probability": 0.11710343936447071
+    }
+  },
+  "training_duration_seconds": 571.26
 }
