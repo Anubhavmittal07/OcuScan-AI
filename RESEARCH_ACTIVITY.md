@@ -427,3 +427,5 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-08-20 21:51] Activity #162: run automated end-to-end clinical screening suite
 - [2026-08-21 11:19] Activity #163: benchmark Grad-CAM attribution heatmaps generation latency
 - [2026-08-21 21:53] Activity #164: implement automated cross-validation on multicenter cataract manifests
+
+<!-- PR milestone: docs: update neural pipeline modularity documentation -->
