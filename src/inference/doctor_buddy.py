@@ -60,6 +60,22 @@ DETERMINISTIC_EVENTS = {
             "suggested_next_step": "विवरण भरें और अनुसंधान सहमति स्वीकार करें।"
         }
     },
+    "screening": {
+        "en": {
+            "message": "Welcome to the Unified Screening Workspace. Select or upload a clear eye image (or switch to Live Camera), and click 'Analyze Image' to begin.",
+            "speak_text": "Welcome to the Screening Workspace. Upload a clear eye image or enable the camera, then click Analyze Image.",
+            "expression": "happy",
+            "severity": "info",
+            "suggested_next_step": "Upload an eye photo or switch to Live Camera to begin screening."
+        },
+        "hi": {
+            "message": "स्क्रीनिंग कार्यक्षेत्र में आपका स्वागत है। आंख की स्पष्ट तस्वीर चुनें या अपलोड करें (या लाइव कैमरा चालू करें), और 'तस्वीर का विश्लेषण करें' पर क्लिक करें।",
+            "speak_text": "स्क्रीनिंग कार्यक्षेत्र में आपका स्वागत है। आंख की स्पष्ट तस्वीर चुनें या कैमरा चालू करें, फिर विश्लेषण शुरू करें।",
+            "expression": "happy",
+            "severity": "info",
+            "suggested_next_step": "आंख की तस्वीर चुनें या लाइव कैमरा चालू करके विश्लेषण शुरू करें।"
+        }
+    },
     "preparation": {
         "en": {
             "message": "Ensure you are in soft, diffuse lighting without direct glare or heavy shadows. Position yourself comfortably about 10 to 15 centimeters from the lens.",
@@ -284,6 +300,22 @@ DETERMINISTIC_EVENTS = {
             "suggested_next_step": "पुष्टि के लिए योग्य चिकित्सक और सीबीसी परीक्षण की सलाह लें।"
         }
     },
+    "report_overview": {
+        "en": {
+            "message": "Welcome to your Screening Report. Review the detailed findings for each ocular condition, and download or print the 2-page clinical PDF report.",
+            "speak_text": "Here is your screening report. You can review all condition findings and download the official PDF report.",
+            "expression": "happy",
+            "severity": "info",
+            "suggested_next_step": "Download or view your 2-page PDF report."
+        },
+        "hi": {
+            "message": "आपकी स्क्रीनिंग रिपोर्ट तैयार है। प्रत्येक नेत्र स्थिति के विस्तृत परिणाम देखें और 2-पेज की पीडीएफ रिपोर्ट डाउनलोड या प्रिंट करें।",
+            "speak_text": "आपकी स्क्रीनिंग रिपोर्ट तैयार है। आप सभी परिणाम देख सकते हैं और पीडीएफ रिपोर्ट डाउनलोड कर सकते हैं।",
+            "expression": "happy",
+            "severity": "info",
+            "suggested_next_step": "2-पृष्ठों की पीडीएफ रिपोर्ट डाउनलोड करें।"
+        }
+    },
     "results_ready": {
         "en": {
             "message": "Screening analysis complete! Review your clinical score, confidence intervals, and chromatic biomarkers. Download the official 2-page report below.",
@@ -318,6 +350,30 @@ class DoctorBuddyResponse(BaseModel):
     severity: str    # 'info', 'warning', 'success', 'danger'
     suggested_next_step: str
     mode: str        # 'deterministic' or 'gemini_enriched'
+
+
+
+# ---------------------------------------------------------------------------
+# Dedicated AI Dr. Astra System Prompt (Screen-Aware Clinical Educator)
+# ---------------------------------------------------------------------------
+_DOCTOR_ASTRA_SYSTEM_INSTRUCTION = """You are AI Dr. Astra, the expert, friendly, and compassionate AI Ocular Health Guide for OcuScan AI (EyeHealthAI).
+
+YOUR CAPABILITIES & PURPOSE:
+1. You have direct, real-time access to the user's active screen context and genuine multi-modal screening outputs (Model A: Anemia/Hemoglobin in g/dL, Model B: SLID Conjunctivitis/Hyperemia, Model C: Scleral Icterus/Jaundice, Model D: Cataract, Model E: Stye/Hordeolum).
+2. When the user asks about their screening results (e.g. "What does my screening result mean?", "Explain my results", "Is this normal?", "Why is my hemoglobin 13.5 g/dL?"), you MUST actively inspect their screening findings provided in the ACTIVE SCREENING SESSION CONTEXT and explain what each score and observation indicates in clear, reassuring, patient-friendly terms!
+3. Ground your explanations in standard physiological references:
+   - Hemoglobin (Hb): Normal adult reference range is typically 12.0–15.5 g/dL for women and 13.5–17.5 g/dL for men. Palpebral conjunctiva pallor reflects capillary red blood cell density.
+   - Conjunctival Hyperemia (SLID): Ciliary/conjunctival blood vessel dilation indicative of surface irritation.
+   - Scleral Icterus: Yellowish tint in the sclera linked to bile pigments.
+   - Cataract: Natural crystalline lens opacity.
+   - Stye / Hordeolum: Eyelid sebaceous/Meibomian gland inflammation.
+4. If image quality issues are noted (blur, low illumination, glare, improper eye distance), guide them on how to capture a sharper photo.
+5. Emphasize that OcuScan AI is an investigational screening-support technology and not a final medical diagnosis.
+6. Always advise consulting a licensed physician and obtaining a standard confirmatory venous Complete Blood Count (CBC) or clinical slit-lamp examination.
+7. NEVER give a flat robotic refusal like "I'm unable to interpret individual screening results". Instead, interpret the screening findings educationally.
+8. NEVER prescribe prescription medicines, antibiotics, or treatment dosages.
+9. Format your responses with structured Markdown: clear headings, bullet points, and bold metric highlights.
+10. If the user writes in Hindi or language is 'hi', reply in warm, natural Hindi in Devanagari script. Otherwise, reply in English."""
 
 
 def get_doctor_buddy_guidance(
@@ -368,7 +424,9 @@ async def ask_doctor_buddy_question(
     language: str = "en",
     current_step: int = 1,
     session_id: Optional[str] = None,
-    history: Optional[List[dict]] = None
+    history: Optional[List[dict]] = None,
+    session_data: Optional[Dict[str, Any]] = None,
+    screen_context: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """
     Processes a user-asked question through OpenAI / Gemini LLM if available,
@@ -404,13 +462,39 @@ async def ask_doctor_buddy_question(
     sanitized_q = sanitize_input(question)
     q_low = sanitized_q.lower()
 
-    # Step 3: Fetch active session context if session_id is provided
+    # Step 3: Fetch active session context from payload or database
     session_context_str = ""
     session_info = {}
-    if session_id:
+
+    # Check incoming session_data / screen_context first
+    active_source = session_data or (screen_context.get("last_results") if isinstance(screen_context, dict) else None)
+    if active_source and isinstance(active_source, dict):
+        session_info["session_id"] = active_source.get("session_id") or session_id or "Active Session"
+        session_info["quality_summary"] = active_source.get("quality_summary") or active_source.get("quality") or {}
+        session_info["results"] = {}
+        for mod in ["anemia", "slid", "jaundice", "cataract", "stye"]:
+            mod_data = active_source.get(f"{mod}_result") or active_source.get(mod)
+            if not mod_data and isinstance(active_source.get("model_results"), dict):
+                mod_data = active_source["model_results"].get(mod)
+            if mod_data and isinstance(mod_data, dict):
+                session_info["results"][mod] = {
+                    "status": mod_data.get("status") or mod_data.get("operational_status") or "Normal",
+                    "prediction_value": mod_data.get("prediction_value") or mod_data.get("view_mean") or (active_source.get("view_mean") if mod == "anemia" else None),
+                    "unit": mod_data.get("unit") or ("g/dL" if mod == "anemia" else ""),
+                    "raw_prediction": mod_data.get("raw_prediction"),
+                    "clinical_decision": mod_data.get("clinical_decision") or (active_source.get("clinical_decision") if mod == "anemia" else None)
+                }
+        if "anemia" not in session_info["results"] and active_source.get("view_mean"):
+            session_info["results"]["anemia"] = {
+                "status": "available",
+                "prediction_value": active_source.get("view_mean"),
+                "unit": "g/dL",
+                "clinical_decision": active_source.get("clinical_decision")
+            }
+
+    if session_id and not session_info.get("results"):
         try:
-            from src.database.database import SessionLocal
-            from src.database.crud import get_session_by_id
+            from src.database.session import SessionLocal, get_session_by_id
             with SessionLocal() as db:
                 db_s = get_session_by_id(db, session_id)
                 if db_s:
@@ -422,24 +506,31 @@ async def ask_doctor_buddy_question(
                         session_info["results"][r.module] = {
                             "status": r.operational_status,
                             "prediction_value": r.prediction_value,
-                            "unit": r.unit
+                            "unit": r.unit,
+                            "clinical_decision": getattr(r, "clinical_decision", None)
                         }
-                    # Build contextual string for LLM or rule engine
-                    res_parts = []
-                    for m, d in session_info["results"].items():
-                        res_parts.append(f"{m.upper()}: status={d['status']}, value={d['prediction_value']} {d.get('unit','')}")
-                    seg_cov = q_sum.get("segmentation", {}).get("coverage_pct", {})
-                    sec_vis = q_sum.get("secondary_vision", {}).get("summary", "")
-                    cal_ens = q_sum.get("calibrated_ensemble", {}).get("tier_label", "")
-                    session_context_str = (
-                        f"ACTIVE SCREENING SESSION CONTEXT (Session ID: {db_s.id}):\n"
-                        f"- Module Outputs: {'; '.join(res_parts)}\n"
-                        f"- Segmentation Coverage: Conjunctiva={seg_cov.get('conjunctiva', 'N/A')}%, Sclera={seg_cov.get('sclera', 'N/A')}%\n"
-                        f"- Calibrated Screening Tier: {cal_ens}\n"
-                        f"- Secondary AI Visual Findings: {sec_vis}\n"
-                    )
         except Exception as e:
             logger.debug(f"Failed to fetch session context for Doctor Buddy: {e}")
+
+    if session_info and session_info.get("results"):
+        res_parts = []
+        for m, d in session_info["results"].items():
+            val_str = f" = {d['prediction_value']}" if d.get('prediction_value') is not None else ""
+            unit_str = f" {d.get('unit','')}".rstrip()
+            dec_str = f" (decision: {d.get('clinical_decision')})" if d.get('clinical_decision') else ""
+            res_parts.append(f"{m.upper()}: status={d['status']}{val_str}{unit_str}{dec_str}")
+        q_sum = session_info.get("quality_summary", {})
+        seg_cov = q_sum.get("segmentation", {}).get("coverage_pct", {})
+        sec_vis = q_sum.get("secondary_vision", {}).get("summary", "")
+        cal_ens = q_sum.get("calibrated_ensemble", {}).get("tier_label", "")
+        session_context_str = (
+            f"ACTIVE SCREENING SESSION CONTEXT (Session ID: {session_info.get('session_id', 'Current')}):\n"
+            f"- Screen Wizard Step: {current_step}\n"
+            f"- Multi-Target Observations on Screen: {'; '.join(res_parts)}\n"
+            f"- Segmentation Coverage: Conjunctiva={seg_cov.get('conjunctiva', 'N/A')}%, Sclera={seg_cov.get('sclera', 'N/A')}%\n"
+            f"- Calibrated Screening Tier: {cal_ens or 'Standard Assessment'}\n"
+            f"- Visual Quality & Notes: {sec_vis or 'Normal Illumination and Optical Sharpness'}\n"
+        )
 
     # Step 4: Try OpenAI Chat API (Official SDK, configurable model, grounded session context)
     openai_key = os.getenv("OPENAI_API_KEY") or getattr(settings, "OPENAI_API_KEY", None)
@@ -450,7 +541,7 @@ async def ask_doctor_buddy_question(
             o_model = os.getenv("OPENAI_MODEL_NAME") or getattr(settings, "OPENAI_MODEL_NAME", "gpt-4o-mini")
 
             system_instruction = (
-                f"{_SYSTEM_INSTRUCTION}\n\n"
+                f"{_DOCTOR_ASTRA_SYSTEM_INSTRUCTION}\n\n"
                 f"You are AI Dr. Astra, the expert ocular health research guide and companion for the EyeHealthAI (OcuScan) clinical screening framework. "
                 f"When asked about this project or how it works, always refer to EyeHealthAI and explain its three independent clinical models: Model A (ResNet-50 Anemia), Model B (MobileNetV3 SLID hyperemia), and Model C (MobileNetV3 Scleral Icterus). "
                 f"Respond in {'Hindi (Devanagari script)' if clean_lang == 'hi' else 'English'}. "
@@ -516,7 +607,7 @@ async def ask_doctor_buddy_question(
 
     if client:
         system_prompt = (
-            f"{_SYSTEM_INSTRUCTION}\n\n"
+            f"{_DOCTOR_ASTRA_SYSTEM_INSTRUCTION}\n\n"
             f"You are AI Dr. Astra, an expert ocular health guide and research companion. "
             f"The user is at Step {current_step} of the screening workflow. "
             f"Respond in {'Hindi (Devanagari script)' if clean_lang == 'hi' else 'English'}. "
@@ -544,7 +635,15 @@ async def ask_doctor_buddy_question(
                     }
                 )
                 resp_text = response.text.strip() if response.text else ""
-                if resp_text:
+                refusal_phrases = [
+                    "unable to interpret individual",
+                    "cannot interpret individual",
+                    "unable to interpret screening",
+                    "cannot provide any interpretation",
+                    "unable to provide medical diagnoses"
+                ]
+                is_refusal = any(p in resp_text.lower() for p in refusal_phrases)
+                if resp_text and not is_refusal:
                     return {
                         "message": resp_text,
                         "speak_text": re.sub(r'[*#_`]', '', resp_text)[:180],
@@ -568,6 +667,8 @@ async def ask_doctor_buddy_question(
         tier_str = "Screening In Progress"
         slid_status = "Normal"
         jaund_status = "Normal"
+        cataract_status = "Normal"
+        stye_status = "Normal"
         if session_info and session_info.get("results"):
             res_dict = session_info["results"]
             anemia_res = res_dict.get("anemia", {})
@@ -579,8 +680,10 @@ async def ask_doctor_buddy_question(
                 pass
             slid_status = res_dict.get("slid", {}).get("status", "Normal")
             jaund_status = res_dict.get("jaundice", {}).get("status", "Normal")
+            cataract_status = res_dict.get("cataract", {}).get("status", "Normal")
+            stye_status = res_dict.get("stye", {}).get("status", "Normal")
             cal = session_info.get("quality_summary", {}).get("calibrated_ensemble", {})
-            tier_str = cal.get("tier_label", "BORDERLINE / CLINICAL REVIEW")
+            tier_str = cal.get("tier_label", "NORMAL / LOW RISK" if (hb_num and hb_num >= 12.0) else "BORDERLINE / CLINICAL REVIEW")
 
         if clean_lang == "hi":
             if hb_num is not None:
@@ -595,10 +698,12 @@ async def ask_doctor_buddy_question(
                 "message": (
                     f"### आपके परिणामों का सरल अर्थ (Screening Summary)\n\n"
                     f"1. 🩸 **रक्त हीमोग्लोबिन (Hb)**: {hb_meaning}\n"
-                    f"2. 👁️ **आंख की सतह (कंजंक्टिवा)**: स्थिति **{slid_status}**। यह देखा गया कि क्या आंख की सतह पर कोई असामान्य लालिमा या सूजन है।\n"
-                    f"3. ☀️ **आंख का सफेद भाग (स्क्लेरा)**: स्थिति **{jaund_status}**। आंख के सफेद भाग में किसी पीलेपन (पीलिया/इक्टेरस) की जांच की गई।\n"
-                    f"4. 📊 **समग्र स्क्रीनिंग श्रेणी**: **{tier_str}**।\n\n"
-                    f"💡 **यह क्या साबित नहीं कर सकता**: यह जांच केवल फोटो के रंगों का गैर-आक्रामक अनुमान है। यह कोई अंतिम डॉक्टरी निदान नहीं है। कमरे की रोशनी और कैमरे के कारण रंगों में थोड़ा अंतर आ सकता है।"
+                    f"2. 👁️ **आंख की सतह (कंजंक्टिवा हाइपरमिया)**: स्थिति **{slid_status}**। आंख की सतह पर असामान्य लालिमा या सूजन की जांच की गई।\n"
+                    f"3. ☀️ **आंख का सफेद भाग (स्क्लेरा / पीलिया)**: स्थिति **{jaund_status}**। आंख के सफेद भाग में किसी पीलेपन (इक्टेरस) की जांच की गई।\n"
+                    f"4. 🔍 **लेंस की पारदर्शिता (मोतियाबिंद / Cataract)**: स्थिति **{cataract_status}**। आंख की पुतली में किसी धुंधलेपन की जांच की गई।\n"
+                    f"5. 🩹 **पलक का स्वास्थ्य (गुहेरी / Stye / Hordeolum)**: स्थिति **{stye_status}**। पलक पर किसी स्थानीय सूजन या गांठ की जांच की गई।\n"
+                    f"6. 📊 **समग्र स्क्रीनिंग श्रेणी**: **{tier_str}**।\n\n"
+                    f"💡 **महत्वपूर्ण संदर्भ**: यह जांच केवल फोटो के रंगों और बनावट का गैर-आक्रामक अनुमान है। अंतिम चिकित्सीय पुष्टि हेतु डॉक्टर से सीबीसी रक्त जांच व नेत्र परीक्षण कराएं।"
                 ),
                 "speak_text": f"आपके परिणामों का अर्थ: हीमोग्लोबिन अनुमान {hb_val_str} है। यह केवल एक गैर-आक्रामक जांच है, अंतिम निदान हेतु डॉक्टर से परामर्श करें।",
                 "expression": "speaking",
@@ -623,13 +728,15 @@ async def ask_doctor_buddy_question(
                 "message": (
                     f"### What Your Screening Results Mean (In Simple Terms)\n\n"
                     f"1. 🩸 **Blood Hemoglobin**: {hb_meaning}\n"
-                    f"2. 👁️ **Eye Surface Health**: Status is **{slid_status}**. We screened the surface of your eye for signs of visible redness or irritation.\n"
-                    f"3. ☀️ **Eye Whites (Sclera)**: Status is **{jaund_status}**. We screened for yellowish coloration that could be linked to bile pigments.\n"
-                    f"4. 📊 **Overall Screening Category**: **{tier_str}**.\n\n"
+                    f"2. 👁️ **Eye Surface Health (SLID Hyperemia)**: Status is **{slid_status}**. We screened the surface of your eye for signs of visible redness or irritation.\n"
+                    f"3. ☀️ **Eye Whites (Sclera / Jaundice)**: Status is **{jaund_status}**. We screened for yellowish coloration linked to bile pigments.\n"
+                    f"4. 🔍 **Crystalline Lens Clarity (Cataract)**: Status is **{cataract_status}**. We screened for visible pupillary lens opacity.\n"
+                    f"5. 🩹 **Eyelid Margins (Stye / Hordeolum)**: Status is **{stye_status}**. We screened for localized eyelid inflammation or swelling.\n"
+                    f"6. 📊 **Overall Screening Category**: **{tier_str}**.\n\n"
                     f"💡 **Important Context & Diagnostic Boundaries**:\n"
-                    f"- This screening estimates **surface optical coloration**, not internal blood cells directly.\n"
+                    f"- This screening estimates **surface optical coloration and morphology**, not internal blood cells directly.\n"
                     f"- It is an early research check, but **cannot definitively diagnose or rule out any condition**.\n"
-                    f"- Ambient lighting, camera sensors, and individual eyelid characteristics influence readings, which is why clinical laboratory confirmation is always recommended."
+                    f"- Ambient lighting, camera sensors, and individual eyelid characteristics influence readings, which is why clinical laboratory confirmation (e.g. venous CBC) is always recommended."
                 ),
                 "speak_text": f"Your estimated hemoglobin is {hb_val_str}. This non-invasive screening reflects surface eyelid coloration and should be confirmed with a standard blood test.",
                 "expression": "speaking",
