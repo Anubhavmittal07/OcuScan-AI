@@ -445,3 +445,5 @@ Clinical Computer Vision Screening Research & Validation Log
 <!-- PR milestone: feat(telemetry): verify edge payload compression ratios -->
 
 <!-- PR milestone: refactor(logger): optimize diagnostic log serialization -->
+
+<!-- PR milestone: docs: add Q4 mobile edge deployment milestones -->
