@@ -24,11 +24,14 @@ from src.database.session import (
     get_session_by_id,
     get_user_sessions,
     save_report_metadata,
+    update_report_email_status,
     delete_user_data,
     delete_session_record,
     update_user_profile_age,
     engine,
-    SessionLocal
+    SessionLocal,
+    sanitize_for_json,
+    safe_json_dumps
 )
 
 __all__ = [
@@ -50,8 +53,11 @@ __all__ = [
     "get_session_by_id",
     "get_user_sessions",
     "save_report_metadata",
+    "update_report_email_status",
     "delete_user_data",
     "delete_session_record",
     "engine",
-    "SessionLocal"
+    "SessionLocal",
+    "sanitize_for_json",
+    "safe_json_dumps"
 ]
