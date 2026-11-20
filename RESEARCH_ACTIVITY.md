@@ -443,3 +443,5 @@ Clinical Computer Vision Screening Research & Validation Log
 <!-- PR milestone: docs: verify research attribution citations in references -->
 
 <!-- PR milestone: feat(telemetry): verify edge payload compression ratios -->
+
+<!-- PR milestone: refactor(logger): optimize diagnostic log serialization -->
