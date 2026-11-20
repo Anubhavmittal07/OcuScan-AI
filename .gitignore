@@ -31,6 +31,9 @@ desktop.ini
 .ipynb_checkpoints/
 
 # Raw Medical Datasets (PROTECT PATIENT DATA PRIVACY & REPO SIZE)
+data/raw/
+reports_out/
+*backup*
 dataset anemia/
 Eye Conjunctiva Segmentation Dataset/
 Image Dataset on Eye Diseases Classification (Uveitis, Conjunctivitis, Cataract, Eyelid) with Symptoms and SMOTE Validation/
@@ -56,3 +59,4 @@ temp/
 *.log
 .coverage
 htmlcov/
+/*.png
