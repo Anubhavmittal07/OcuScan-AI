@@ -59,7 +59,8 @@ class PersonalizedAIService:
         if self._openai_client is None and self.api_key and len(self.api_key.strip()) > 5:
             try:
                 import openai
-                self._openai_client = openai.OpenAI(api_key=self.api_key.strip(), timeout=25.0)
+                timeout_val = float(os.getenv('OPENAI_TIMEOUT_SECONDS', '3.5'))
+                self._openai_client = openai.OpenAI(api_key=self.api_key.strip(), timeout=timeout_val)
             except Exception as e:
                 logger.warning(f"Could not initialize OpenAI client for personalized AI: {e}")
                 self._openai_client = None
@@ -415,7 +416,7 @@ class PersonalizedAIService:
                 {"role": "user", "content": content_items}
             ],
             response_format={"type": "json_object"},
-            max_tokens=1200,
+            max_tokens=550,
             temperature=0.2
         )
 
