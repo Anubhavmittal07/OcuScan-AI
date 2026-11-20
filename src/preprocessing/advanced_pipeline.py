@@ -144,12 +144,23 @@ def normalize_image_orientation(pil_img: Image.Image) -> Image.Image:
     """
     Applies EXIF orientation normalization so smartphone/camera photos
     are rotated right-side up before landmark detection and inference.
+    Safely supports both PIL.Image and numpy.ndarray.
     """
     try:
+        if not isinstance(pil_img, Image.Image):
+            if isinstance(pil_img, np.ndarray):
+                if len(pil_img.shape) == 2:
+                    pil_img = Image.fromarray(pil_img).convert('RGB')
+                elif pil_img.shape[2] == 4:
+                    pil_img = Image.fromarray(cv2.cvtColor(pil_img, cv2.COLOR_BGRA2RGB))
+                else:
+                    pil_img = Image.fromarray(cv2.cvtColor(pil_img, cv2.COLOR_BGR2RGB))
+            else:
+                return pil_img
         transposed = ImageOps.exif_transpose(pil_img)
         return transposed.convert('RGB') if transposed else pil_img.convert('RGB')
     except Exception:
-        return pil_img.convert('RGB')
+        return pil_img.convert('RGB') if hasattr(pil_img, 'convert') else Image.fromarray(pil_img)
 
 
 # ---------------------------------------------------------------------------
@@ -244,9 +255,9 @@ def detect_and_crop_ocular_region(
                 # 2. Outer eye span spans >= 25% of image width while vertical face height is short (< 48% of image height).
                 is_direct_macro = False
                 if allow_macro_bypass:
-                    if primary_face["ew_max"] / orig_w >= 0.16 or (primary_face["ew_max"] * primary_face["eh_max"]) / total_area >= 0.020:
+                    if primary_face["ew_max"] / orig_w >= 0.12 or (primary_face["ew_max"] * primary_face["eh_max"]) / total_area >= 0.012:
                         is_direct_macro = True
-                    elif (primary_face["eye_span"] / orig_w >= 0.25) and (primary_face["face_h"] / orig_h < 0.48):
+                    elif (primary_face["eye_span"] / orig_w >= 0.18) and (primary_face["face_h"] / orig_h < 0.60):
                         is_direct_macro = True
 
                 if is_direct_macro:
@@ -278,13 +289,13 @@ def detect_and_crop_ocular_region(
                         ew = eye_dict["w"]
                         eh = eye_dict["h"]
                         if ew > 10 and eh > 6:
-                            # Generous anatomical padding:
-                            # Horizontal: +85% of eye width
-                            # Top: +65% of eye width (covers full upper eyelid & brow margin)
-                            # Bottom: +95% of eye width (covers full lower eyelid & palpebral conjunctiva)
-                            pad_x = int(ew * 0.85)
-                            pad_top = int(max(eh * 1.5, ew * 0.65))
-                            pad_bot = int(max(eh * 2.2, ew * 0.95))
+                            # Generous anatomical padding preserving both eyelids, margin cilia & conjunctiva:
+                            # Horizontal: +100% of eye width
+                            # Top: max(2.2*eh, 1.15*ew) (ensures upper eyelid margin, stye/chalazion nodules, lashes & brow fold are fully retained)
+                            # Bottom: max(2.5*eh, 1.20*ew) (covers lower eyelid, palpebral conjunctiva & malar margin)
+                            pad_x = int(ew * 1.00)
+                            pad_top = int(max(eh * 2.2, ew * 1.15))
+                            pad_bot = int(max(eh * 2.5, ew * 1.20))
 
                             cx = max(0, int(eye_dict["min_x"] - pad_x))
                             cy = max(0, int(eye_dict["min_y"] - pad_top))
@@ -468,15 +479,18 @@ def detect_and_crop_ocular_region(
                     "side": "left" if (ex + ew / 2) < (orig_w / 2) else "right"
                 })
 
-    # Macro Eye Check: If no full face is present and image is macro close-up
+    # Macro Eye Check: If no full face is present across the image
     is_macro = False
     if prominent_face is None:
+        # When no face structure is detected across the entire image,
+        # an image containing an eye framing or close-up ocular scene is already a macro close-up.
         if len(detected_eyes) == 0:
             is_macro = True
         else:
             largest_eye = max(detected_eyes, key=lambda e: e["box"][2] * e["box"][3])
             bx, by, bw, bh = largest_eye["box"]
-            if (bw / orig_w) >= 0.25 or (bh / orig_h) >= 0.25 or (bw * bh) / total_area >= 0.08:
+            # Any image without a face where 1-2 eyes are framed is a macro eye capture (preserves full eyelids)
+            if len(detected_eyes) <= 2 or (bw / orig_w) >= 0.08 or (bw * bh) / total_area >= 0.005:
                 is_macro = True
 
     # Case A: Direct Macro Eye (Avoid unnecessary cropping!)
@@ -516,9 +530,10 @@ def detect_and_crop_ocular_region(
         ex, ey, ew, eh = best_eye["box"]
         eye_side = best_eye.get("side", "unspecified")
 
-        pad_x = int(ew * 0.50)
-        pad_top = int(max(eh * 0.40, ew * 0.40))
-        pad_bot = int(max(eh * 0.65, ew * 0.65))
+        # Generous padding preserving eyelids, margin cilia & conjunctiva:
+        pad_x = int(ew * 0.90)
+        pad_top = int(max(eh * 1.8, ew * 0.95))
+        pad_bot = int(max(eh * 2.2, ew * 1.05))
 
         cx = max(0, ex - pad_x)
         cy = max(0, ey - pad_top)
@@ -757,23 +772,23 @@ def evaluate_quality_gate(
     crop_w, crop_h = processed_img.size
     crop_pixels = crop_w * crop_h
 
-    # 4. Binary Defect Flags
-    is_blurry = lap_var < 24.0
-    is_underexposed = mean_lum < 36.0
-    is_overexposed = mean_lum > 224.0 or glare_pixels > 6.0
-    is_low_contrast = std_lum < 18.0
-    is_too_small = crop_w < 60 or crop_h < 50
-    is_distant = detection_info.get("is_too_distant", False)
+    # 4. Binary Defect Flags (Explicit native Python types to prevent numpy.bool_ JSON serialization failures)
+    is_blurry = bool(lap_var < 24.0)
+    is_underexposed = bool(mean_lum < 36.0)
+    is_overexposed = bool(mean_lum > 224.0 or glare_pixels > 6.0)
+    is_low_contrast = bool(std_lum < 18.0)
+    is_too_small = bool(crop_w < 60 or crop_h < 50)
+    is_distant = bool(detection_info.get("is_too_distant", False))
 
     # 5. Model-Specific Suitability
-    eye_detected = detection_info.get("eye_detected", False)
-    is_macro = detection_info.get("is_macro", False)
+    eye_detected = bool(detection_info.get("eye_detected", False))
+    is_macro = bool(detection_info.get("is_macro", False))
 
-    anemia_suitable = (not is_blurry) and (not is_underexposed) and (not is_too_small) and (not is_distant)
-    slid_suitable = (not is_blurry) and (not is_overexposed) and (not is_too_small) and (not is_distant)
-    jaundice_suitable = (not is_overexposed) and (glare_pixels < 5.0) and (not is_too_small) and (not is_distant)
+    anemia_suitable = bool((not is_blurry) and (not is_underexposed) and (not is_too_small) and (not is_distant))
+    slid_suitable = bool((not is_blurry) and (not is_overexposed) and (not is_too_small) and (not is_distant))
+    jaundice_suitable = bool((not is_overexposed) and (glare_pixels < 5.0) and (not is_too_small) and (not is_distant))
 
-    overall_suitable = anemia_suitable and slid_suitable
+    overall_suitable = bool(anemia_suitable and slid_suitable)
 
     # 6. Actionable Clinical Guidance
     issues_en = []
