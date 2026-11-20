@@ -52,3 +52,5 @@ Per **AGENTS.md** safety rules:
 2. **Preserve clinical colors:** Do not apply color jitter, hue shifts, solarization, or aggressive filtering that alter vascular erythema or scleral bilirubin staining.
 3. **Prevent data leakage:** All patient sessions are partitioned with subject-level isolation to prevent cross-partition contamination.
 4. **Transparent operational status:** Models awaiting prospective trial validation are designated as `"Available for Evaluation (Research Prototype)"` rather than claimed as approved medical products.
+
+<!-- Clinical benchmark timestamp verification -->
