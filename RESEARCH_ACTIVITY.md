@@ -462,3 +462,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-11-20 22:30] Activity #169: evaluate MobileNetV3-Small on conjunctivitis validation split
 - [2026-11-20 22:30] Activity #170: calibrate model uncertainty scores for low-light captures
 - [2026-11-20 22:30] Activity #171: update bilingual English-Hindi medical report generator templates
+- [2026-11-20 22:30] Activity #172: implement automated cross-validation on multicenter cataract manifests
