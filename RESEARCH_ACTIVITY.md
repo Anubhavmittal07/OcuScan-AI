@@ -433,3 +433,5 @@ Clinical Computer Vision Screening Research & Validation Log
 <!-- PR milestone: docs: specify clinical data privacy and HIPAA guidelines -->
 
 <!-- PR milestone: feat(audit): implement session validation hash check -->
+
+<!-- PR milestone: refactor(config): fine-tune default batch infer sizing -->
