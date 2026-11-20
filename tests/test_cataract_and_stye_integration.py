@@ -46,7 +46,7 @@ def test_client():
 
 @pytest.fixture
 def sample_eye_image(tmp_path):
-    img_path = str(tmp_path / "test_eye.jpg")
+    img_path = str(tmp_path / "test_slit_eye.jpg")
     img = Image.new("RGB", (300, 300), color=(180, 110, 110))
     img.save(img_path, format="JPEG")
     return img_path
