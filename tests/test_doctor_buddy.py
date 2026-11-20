@@ -50,6 +50,20 @@ class TestDoctorBuddyDeterministicGuidance:
         assert res["expression"] == "happy"
         assert res["severity"] == "info"
 
+    def test_screening_event_english(self):
+        res = get_doctor_buddy_guidance("screening", "en")
+        assert "Screening" in res["message"]
+        assert "eye image" in res["message"].lower() or "upload" in res["message"].lower()
+        assert res["severity"] == "info"
+        assert len(res["speak_text"]) > 0
+
+    def test_screening_event_hindi(self):
+        res = get_doctor_buddy_guidance("screening", "hi")
+        assert "स्क्रीनिंग" in res["message"]
+        assert "तस्वीर" in res["message"] or "अपलोड" in res["message"]
+        assert res["severity"] == "info"
+        assert len(res["speak_text"]) > 0
+
     def test_camera_permission_denied_guidance(self):
         res = get_doctor_buddy_guidance("camera_permission_denied", "en")
         assert res["severity"] == "warning"
@@ -200,3 +214,42 @@ class TestDoctorBuddyEndpoints:
         assert res.status_code == 200
         data = res.json()
         assert "leakage" in data["message"].lower() or "split" in data["message"].lower()
+
+    def test_ask_endpoint_interprets_screen_results_without_refusal(self, client):
+        """Verifies Dr. Astra inspects active screen results and explains findings instead of refusing."""
+        payload = {
+            "question": "What does my screening result mean?",
+            "language": "en",
+            "current_step": 5,
+            "session_data": {
+                "session_id": "session_sample_eval",
+                "view_mean": 13.5,
+                "clinical_decision": "NORMAL",
+                "slid_result": {"status": "Normal"},
+                "jaundice_result": {"status": "Normal"},
+                "cataract_result": {"status": "Normal"},
+                "stye_result": {"status": "Normal"}
+            }
+        }
+        res = client.post("/api/doctor-buddy/ask", json=payload)
+        assert res.status_code == 200
+        data = res.json()
+        msg = data["message"]
+        # Must interpret findings educationally and NOT output generic refusal
+        assert "unable to interpret" not in msg.lower()
+        assert "13.5" in msg or "13.50" in msg
+        assert "hemoglobin" in msg.lower() or "anemia" in msg.lower()
+
+    def test_reliability_metrics_endpoint(self, client):
+        """Verifies /api/reliability-metrics returns genuine multi-model evaluated metrics."""
+        res = client.get("/api/reliability-metrics")
+        assert res.status_code == 200
+        data = res.json()
+        assert "models" in data
+        assert "model_a_anemia" in data["models"]
+        assert "model_b_slid_hyperemia" in data["models"]
+        assert "model_d_cataract" in data["models"]
+        assert "model_e_stye" in data["models"]
+        assert data["models"]["model_a_anemia"]["test_patient_mae"] > 0
+        assert data["models"]["model_b_slid_hyperemia"]["accuracy"] > 0.90
+        assert "webcam_vs_upload_comparison" in data
