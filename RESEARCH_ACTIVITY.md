@@ -429,3 +429,5 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-08-21 21:53] Activity #164: implement automated cross-validation on multicenter cataract manifests
 
 <!-- PR milestone: docs: update neural pipeline modularity documentation -->
+
+<!-- PR milestone: docs: specify clinical data privacy and HIPAA guidelines -->
