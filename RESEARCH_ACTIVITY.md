@@ -431,3 +431,5 @@ Clinical Computer Vision Screening Research & Validation Log
 <!-- PR milestone: docs: update neural pipeline modularity documentation -->
 
 <!-- PR milestone: docs: specify clinical data privacy and HIPAA guidelines -->
+
+<!-- PR milestone: feat(audit): implement session validation hash check -->
