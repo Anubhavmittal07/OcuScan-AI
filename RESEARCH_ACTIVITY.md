@@ -441,3 +441,5 @@ Clinical Computer Vision Screening Research & Validation Log
 <!-- PR milestone: test(fixtures): update synthetic ocular calibration inputs -->
 
 <!-- PR milestone: docs: verify research attribution citations in references -->
+
+<!-- PR milestone: feat(telemetry): verify edge payload compression ratios -->
