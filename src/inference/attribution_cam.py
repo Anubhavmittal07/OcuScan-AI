@@ -216,7 +216,14 @@ def generate_model_attribution_package(
       - 'dimensions': [width, height]
       - 'disclaimer': mandatory medical attribution notice
     """
-    orig_b64 = pil_to_base64_jpeg(final_input_pil)
+    orig_b64 = getattr(final_input_pil, "_cached_b64", None)
+    if orig_b64 is None:
+        orig_b64 = pil_to_base64_jpeg(final_input_pil)
+        if hasattr(final_input_pil, "__dict__"):
+            try:
+                final_input_pil._cached_b64 = orig_b64
+            except Exception:
+                pass
     disclaimer_text = (
         "AI attention visualization: highlights image regions that influenced the model's output. "
         "It is not a verified disease boundary or medical diagnosis."
