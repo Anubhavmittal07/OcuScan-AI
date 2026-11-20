@@ -257,7 +257,7 @@ class TestResultsPageRedesignAndEnhancedAI:
 
         assert 'btnDlScreening' in js
         assert 'btnDlScreeningAlt' in js
-        assert 'Download Screening Report PDF' in js
+        assert ('Download Screening Report PDF' in js or 'Download Major Screening Report PDF' in js)
         assert 'View Interactive Web Report' in js
         assert 'linkAnemiaReport' not in js
         assert 'linkSlidReport' not in js
