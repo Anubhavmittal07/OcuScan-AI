@@ -439,3 +439,5 @@ Clinical Computer Vision Screening Research & Validation Log
 <!-- PR milestone: docs: add clinician FAQ for AI screening confidence scores -->
 
 <!-- PR milestone: test(fixtures): update synthetic ocular calibration inputs -->
+
+<!-- PR milestone: docs: verify research attribution citations in references -->
