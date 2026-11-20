@@ -459,3 +459,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-11-20 22:30] Activity #166: validate laboratory hemoglobin ground-truth regression bounds
 - [2026-11-20 22:30] Activity #167: optimize eye localization ROI cropping pipeline
 - [2026-11-20 22:30] Activity #168: update clinical safety checks for conjunctival pallor preservation
+- [2026-11-20 22:30] Activity #169: evaluate MobileNetV3-Small on conjunctivitis validation split
