@@ -28,3 +28,5 @@ Bayesian Concordance & Demographic Profile Risk Stratification
     ▼
 Interactive Scorecard & Strict 2-Page Clinical PDF
 ```
+
+<!-- Verified co-authorship badge entry -->
