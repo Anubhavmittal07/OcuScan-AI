@@ -449,3 +449,5 @@ Clinical Computer Vision Screening Research & Validation Log
 <!-- PR milestone: docs: add Q4 mobile edge deployment milestones -->
 
 <!-- PR milestone: feat(thresholds): calibrate bilateral discrepancy guardrails -->
+
+<!-- PR milestone: docs: add medical terminology glossary for ocular pallor -->
