@@ -437,3 +437,5 @@ Clinical Computer Vision Screening Research & Validation Log
 <!-- PR milestone: refactor(config): fine-tune default batch infer sizing -->
 
 <!-- PR milestone: docs: add clinician FAQ for AI screening confidence scores -->
+
+<!-- PR milestone: test(fixtures): update synthetic ocular calibration inputs -->
