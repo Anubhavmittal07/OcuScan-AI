@@ -447,3 +447,5 @@ Clinical Computer Vision Screening Research & Validation Log
 <!-- PR milestone: refactor(logger): optimize diagnostic log serialization -->
 
 <!-- PR milestone: docs: add Q4 mobile edge deployment milestones -->
+
+<!-- PR milestone: feat(thresholds): calibrate bilateral discrepancy guardrails -->
