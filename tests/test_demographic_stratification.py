@@ -1,21 +1,24 @@
 import pytest
-from src.inference.personalized_ai import get_demographic_hb_thresholds
+from src.inference.clinical_analytics import compute_anemia_clinical_decision
 
-def test_pediatric_thresholds():
-    thresholds = get_demographic_hb_thresholds(age=8, sex="male")
-    assert thresholds["mild"] == 11.0
-    assert thresholds["category"] == "Pediatric (<12y)"
+def test_pediatric_population_flag():
+    decision = compute_anemia_clinical_decision(hb_val=12.5, age_years=10, clinical_sex="male")
+    assert decision["population_validation"]["is_validated_population"] is False
+    assert decision["population_validation"]["status"] == "outside_validated_population"
+    assert decision["population_validation"]["reason"] == "pediatric_under_18"
 
-def test_adult_female_thresholds():
-    thresholds = get_demographic_hb_thresholds(age=28, sex="female")
-    assert thresholds["mild"] == 12.0
-    assert thresholds["category"] == "Adult Female"
+def test_adult_female_normal_hb():
+    decision = compute_anemia_clinical_decision(hb_val=13.0, age_years=28, clinical_sex="female")
+    assert decision["who_stage"] == "normal_non_anemic"
+    assert decision["population_validation"]["is_validated_population"] is True
 
-def test_adult_male_thresholds():
-    thresholds = get_demographic_hb_thresholds(age=35, sex="male")
-    assert thresholds["mild"] == 13.0
-    assert thresholds["category"] == "Adult Male"
+def test_adult_male_mild_anemia():
+    decision = compute_anemia_clinical_decision(hb_val=11.8, age_years=35, clinical_sex="male")
+    assert decision["who_stage"] == "mild_anemia"
+    assert decision["population_validation"]["is_validated_population"] is True
 
-def test_geriatric_thresholds():
-    thresholds = get_demographic_hb_thresholds(age=72, sex="female")
-    assert thresholds["category"] == "Geriatric (>65y)"
+def test_geriatric_boundary_flag():
+    decision = compute_anemia_clinical_decision(hb_val=12.2, age_years=92, clinical_sex="female")
+    assert decision["population_validation"]["is_validated_population"] is False
+    assert decision["population_validation"]["status"] == "outside_validated_population"
+    assert decision["population_validation"]["reason"] == "geriatric_over_88"
