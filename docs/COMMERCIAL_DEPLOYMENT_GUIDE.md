@@ -182,3 +182,5 @@ server {
     }
 }
 ```
+
+<!-- Telemetry sync protocol verification -->
