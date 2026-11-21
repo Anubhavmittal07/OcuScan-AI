@@ -54,3 +54,5 @@ Per **AGENTS.md** safety rules:
 4. **Transparent operational status:** Models awaiting prospective trial validation are designated as `"Available for Evaluation (Research Prototype)"` rather than claimed as approved medical products.
 
 <!-- Clinical benchmark timestamp verification -->
+
+<!-- Peer review protocol updated with collaborator @Anubhavmittal07 -->
