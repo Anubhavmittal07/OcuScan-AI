@@ -30,3 +30,5 @@ Interactive Scorecard & Strict 2-Page Clinical PDF
 ```
 
 <!-- Verified co-authorship badge entry -->
+
+<!-- Architecture modular interfaces synchronized with @Anubhavmittal07 -->
