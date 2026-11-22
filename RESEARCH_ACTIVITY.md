@@ -469,3 +469,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-11-20 22:30] Activity #176: run automated end-to-end clinical screening suite
 - [2026-11-22 15:30] Activity #177: benchmark MobileNetV3-Small inference latency on edge CPU
 - [2026-11-22 15:30] Activity #178: validate bilateral eyelid ROI consistency across multicenter samples
+- [2026-11-22 15:30] Activity #179: audit glare reflection detection thresholds on slit-lamp captures
