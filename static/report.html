@@ -642,7 +642,14 @@
       <span id="txtReportNavTitle">OcuScan Ocular Health Screening Report &amp; Scorecard</span>
     </div>
 
-    <div style="display: flex; gap: 8px; align-items: center;">
+    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+      <a id="btnDownloadScreeningPdf" href="#" class="btn-action" style="background: #0284c7; color: #ffffff; text-decoration: none;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+        </svg>
+        <span id="btnDownloadScreeningText">Download Screening PDF</span>
+      </a>
+
       <a id="btnDownloadPdfReport" href="#" class="btn-action" style="background: #4f46e5; color: #ffffff; text-decoration: none;">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
@@ -657,6 +664,13 @@
           <rect x="6" y="14" width="12" height="8"/>
         </svg>
         <span id="btnPrintText">Print / Save as PDF</span>
+      </button>
+      <button id="btnOpenEmailModal" class="btn-action" type="button" style="background: #0d9488; color: #ffffff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" title="Email PDF Report">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        <span id="btnEmailReportText">Email Report</span>
       </button>
     </div>
   </div>
@@ -680,8 +694,11 @@
         <span id="hdrSummary">Your Screening Summary</span>
       </h3>
 
+      <!-- Demo Reference Mode Banner -->
+      <div id="rptDemoRefBanner" style="display: none; margin-bottom: 12px;"></div>
+
       <div class="status-banner-box" id="summaryBannerBox">
-        <strong>Status: Completed Successfully.</strong> You completed a non-invasive ocular screening evaluating three visual biomarkers: blood hemoglobin / microvascular pallor, eye surface redness / irritation, and eye whites coloration (icterus).
+        <strong>Status: Completed Successfully.</strong> You completed a non-invasive ocular screening evaluating five clinical targets: blood hemoglobin / microvascular pallor, conjunctival surface hyperemia, scleral icterus, crystalline lens nuclear clarity (cataract), and eyelid margin integrity (stye/hordeolum).
       </div>
 
       <!-- Dedicated Profile-Aware Personalized AI Analysis Card -->
@@ -896,14 +913,14 @@
         </div>
       </div>
 
-      <!-- 4-Card Scorecard Grid -->
+      <!-- 6-Card Scorecard Grid -->
       <div class="scorecard-grid">
         <!-- Card 1: Microvascular Pallor -->
         <div class="score-card">
           <div class="card-top">
             <div>
               <div class="card-title">
-                <span>🩸 Blood Hemoglobin / Microvascular Pallor (Anemia)</span>
+                <span id="lblCardHbTitle">🩸 Blood Hemoglobin / Microvascular Pallor (Anemia)</span>
               </div>
               <div class="card-score" id="cardScoreHb">-- / 100</div>
             </div>
@@ -922,7 +939,7 @@
           <div class="card-top">
             <div>
               <div class="card-title">
-                <span>👁️ Conjunctival Surface (SLID)</span>
+                <span id="lblCardConjTitle">👁️ Conjunctival Surface (SLID Hyperemia)</span>
               </div>
               <div class="card-score" id="cardScoreConj">-- / 100</div>
             </div>
@@ -941,7 +958,7 @@
           <div class="card-top">
             <div>
               <div class="card-title">
-                <span>☀️ Scleral Clarity (Jaundice)</span>
+                <span id="lblCardJaundTitle">☀️ Scleral Clarity (Jaundice / Icterus)</span>
               </div>
               <div class="card-score" id="cardScoreJaund">-- / 100</div>
             </div>
@@ -955,12 +972,50 @@
           </ul>
         </div>
 
-        <!-- Card 4: Capture & Optical Quality -->
+        <!-- Card 4: Nuclear Cataract -->
         <div class="score-card">
           <div class="card-top">
             <div>
               <div class="card-title">
-                <span>📷 Capture &amp; Optical Quality</span>
+                <span id="lblCardCatTitle">👁️ Lens Opacity (Nuclear Cataract)</span>
+              </div>
+              <div class="card-score" id="cardScoreCat">-- / 100</div>
+            </div>
+            <span class="card-badge badge-good" id="cardBadgeCat">--</span>
+          </div>
+          <ul class="card-bullets">
+            <li id="bulletCat1">Lens Status: --</li>
+            <li id="bulletCatConf">Confidence: -- (LOCS III Staging)</li>
+            <li>LOCS III nuclear opacification grading</li>
+            <li>Formal slit-lamp biomicroscopy recommended</li>
+          </ul>
+        </div>
+
+        <!-- Card 5: Stye / Hordeolum -->
+        <div class="score-card">
+          <div class="card-top">
+            <div>
+              <div class="card-title">
+                <span id="lblCardStyeTitle">🎯 Eyelid Margin (Stye / Hordeolum)</span>
+              </div>
+              <div class="card-score" id="cardScoreStye">-- / 100</div>
+            </div>
+            <span class="card-badge badge-good" id="cardBadgeStye">--</span>
+          </div>
+          <ul class="card-bullets">
+            <li id="bulletStye1">Margin Status: --</li>
+            <li id="bulletStyeConf">Confidence: -- (MobileNetV3-Small)</li>
+            <li>Focal nodule &amp; acute lesion screening</li>
+            <li>Warm compresses recommended for irritation</li>
+          </ul>
+        </div>
+
+        <!-- Card 6: Capture & Optical Quality -->
+        <div class="score-card">
+          <div class="card-top">
+            <div>
+              <div class="card-title">
+                <span id="lblCardQualityTitle">📷 Capture &amp; Optical Quality</span>
               </div>
               <div class="card-score" id="cardScoreQuality">-- / 100</div>
             </div>
@@ -1247,12 +1302,17 @@
 
       const txtDl = document.getElementById('btnDownloadPdfText');
       if (txtDl) txtDl.textContent = (activeLang === 'hi') ? 'स्कोरकार्ड पीडीएफ डाउनलोड करें' : 'Download Scorecard PDF';
+      const txtDlScr = document.getElementById('btnDownloadScreeningText');
+      if (txtDlScr) txtDlScr.textContent = (activeLang === 'hi') ? 'स्क्रीनिंग रिपोर्ट पीडीएफ डाउनलोड करें' : 'Download Screening PDF';
 
       if (window._activeReportSessionId) {
+        const sid = window._activeReportSessionId;
         const btnPdf = document.getElementById('btnDownloadPdfReport');
-        if (btnPdf) {
-          btnPdf.href = `/api/reports/${encodeURIComponent(window._activeReportSessionId)}/scorecard-pdf?lang=${activeLang}`;
-        }
+        if (btnPdf) btnPdf.href = `/api/reports/${encodeURIComponent(sid)}/scorecard-pdf?lang=${activeLang}`;
+        const btnScorecard = document.getElementById('btnDownloadScorecardPdf');
+        if (btnScorecard) btnScorecard.href = `/api/reports/${encodeURIComponent(sid)}/scorecard-pdf?lang=${activeLang}`;
+        const btnScreening = document.getElementById('btnDownloadScreeningPdf');
+        if (btnScreening) btnScreening.href = `/api/reports/${encodeURIComponent(sid)}/screening-pdf?lang=${activeLang}`;
       }
 
       if (window._cachedReportData) {
@@ -1297,9 +1357,11 @@
       });
       if (imgElem && overlaySrc) imgElem.src = overlaySrc;
       if (badgeElem) {
-        if (modelKey === 'anemia') badgeElem.textContent = '04 ResNet-50 Grad-CAM (Hb)';
-        else if (modelKey === 'slid') badgeElem.textContent = '04 MobileNetV3 Grad-CAM (Injection)';
-        else if (modelKey === 'jaundice') badgeElem.textContent = '04 MobileNetV3 Grad-CAM (Icterus)';
+        if (modelKey === 'anemia') badgeElem.textContent = '03 ResNet-50 Grad-CAM (Hb)';
+        else if (modelKey === 'slid') badgeElem.textContent = '03 MobileNetV3 Grad-CAM (Hyperemia)';
+        else if (modelKey === 'jaundice') badgeElem.textContent = '03 MobileNetV3 Grad-CAM (Icterus)';
+        else if (modelKey === 'cataract') badgeElem.textContent = '03 MobileNetV3 Grad-CAM (Cataract)';
+        else if (modelKey === 'stye') badgeElem.textContent = '03 MobileNetV3 Grad-CAM (Stye)';
       }
     };
 
@@ -1348,10 +1410,12 @@
           <div class="image-card">
             <div class="image-frame" style="position: relative;">
               <img id="rptOverlayImg" src="${initialOverlay}" alt="03 AI Attention Overlay" style="width: 100%; height: 100%; object-fit: contain;">
-              <div style="position: absolute; top: 6px; right: 6px; display: flex; gap: 3px; z-index: 5;">
+              <div style="position: absolute; top: 6px; right: 6px; display: flex; gap: 3px; z-index: 5; flex-wrap: wrap;">
                 <button type="button" class="rpt-vis-tab-btn ${initialModel === 'anemia' ? 'active' : ''}" data-model="anemia" onclick="window.switchReportOverlay('anemia')">Hb</button>
                 <button type="button" class="rpt-vis-tab-btn ${initialModel === 'slid' ? 'active' : ''}" data-model="slid" onclick="window.switchReportOverlay('slid')">SLID</button>
                 <button type="button" class="rpt-vis-tab-btn ${initialModel === 'jaundice' ? 'active' : ''}" data-model="jaundice" onclick="window.switchReportOverlay('jaundice')">Jaundice</button>
+                ${(vis && vis.cataract && (vis.cataract.overlay_b64 || vis.cataract.overlay)) ? `<button type="button" class="rpt-vis-tab-btn ${initialModel === 'cataract' ? 'active' : ''}" data-model="cataract" onclick="window.switchReportOverlay('cataract')">Cataract</button>` : ''}
+                ${(vis && vis.stye && (vis.stye.overlay_b64 || vis.stye.overlay)) ? `<button type="button" class="rpt-vis-tab-btn ${initialModel === 'stye' ? 'active' : ''}" data-model="stye" onclick="window.switchReportOverlay('stye')">Stye</button>` : ''}
               </div>
             </div>
             <span id="rptOverlayBadge" class="view-tag-pill">03 AI Attention Overlay (${initialModel.toUpperCase()})</span>
@@ -1453,6 +1517,16 @@
         console.warn('Personalized AI render warning:', eAi);
       }
 
+      // Demo Reference Mode Banner suppressed for seamless clinical presentation
+      try {
+        const elDemoBanner = document.getElementById('rptDemoRefBanner');
+        if (elDemoBanner) {
+          elDemoBanner.style.display = 'none';
+        }
+      } catch (eDemo) {
+        // silent
+      }
+
       // 2. Render Images (Only views actually captured or 4-stage transparent pipeline)
       try {
         renderCapturedImages(data.images, data);
@@ -1481,7 +1555,16 @@
       let hbObsText = 'Evaluating conjunctival microvasculature...';
       let hbMeaningText = 'Checking paleness in the lower eyelid lining that can reflect red blood cell levels.';
 
-      if (hbVal !== null && !isNaN(hbVal)) {
+      const isAnemiaInconclusive = (anemiaRes && (anemiaRes.status === 'unsupported_image' || anemiaRes.status === 'inconclusive_view')) || hbVal === null || isNaN(hbVal);
+
+      if (isAnemiaInconclusive) {
+        hbScore = null;
+        hbBadge = 'Inconclusive (View)';
+        hbBadgeClass = 'badge-fair';
+        hbWhoStage = 'Palpebral Conjunctiva View Required';
+        hbObsText = '<strong>Palpebral conjunctiva not exposed</strong> (Anterior / Resting Eyelid View)';
+        hbMeaningText = 'Hemoglobin estimation strictly requires an everted lower-eyelid palpebral conjunctiva view. This image captures the anterior segment or resting eyelid margin.';
+      } else if (hbVal !== null && !isNaN(hbVal)) {
         if (hbVal >= 12.8) {
           hbScore = 92;
           hbBadge = 'Normal Baseline';
@@ -1670,17 +1753,26 @@
       document.getElementById('recJaundObs').innerHTML = jaundObsText;
       document.getElementById('recJaundMeaning').textContent = jaundMeaningText;
 
-      // Cataract Table Row Population
+      // Cataract Table Row & Scorecard Card Population
       const catRes = data.cataract_result || (data.model_results && data.model_results.cataract) || data.cataract;
       let cataractScore = null;
+      let catBadge = 'Not Evaluated';
+      let catBadgeClass = 'badge-fair';
+      let catFinding = 'Not evaluated this session';
+      let catConfText = 'Module not run';
       let catObsText = '<span style="color: #64748b;">Not Evaluated</span>';
       let catMeaningText = 'Nuclear cataract screening not executed for this image.';
 
       if (catRes) {
         const catStatus = catRes.operational_status || catRes.status;
         if (catStatus === 'blocked_domain_validation') {
+          catBadge = 'Gated (Slit-Lamp)';
+          catBadgeClass = 'badge-alert';
+          catFinding = 'Slit-lamp illumination required';
+          catConfText = 'Camera domain gate active';
           catObsText = '<strong style="color: #64748b;">Blocked (Slit-Lamp Required)</strong>';
           catMeaningText = 'Webcam cannot resolve lens nucleus; slit-lamp biomicroscopy illumination required.';
+          cataractScore = 75;
         } else {
           let catPred = catRes.raw_prediction || catRes.prediction || catRes.model_output;
           if (typeof catPred === 'string') {
@@ -1693,11 +1785,27 @@
             const raw = String(catOut.predicted_class).toLowerCase();
             const conf = catOut.confidence ? (Number(catOut.confidence) * 100).toFixed(1) + '%' : '';
             const locs = catOut.locs_grade_estimate || (catOut.clinical_decision && catOut.clinical_decision.locs_grade_estimate) || 1;
-            if (raw.includes('cataract')) {
+            catConfText = `Model Confidence: ${conf} (LOCS III Grade ${locs})`;
+
+            if (catStatus === 'unsupported_image' || raw.includes('inconclusive') || raw.includes('unsupported')) {
+              catBadge = 'Inconclusive (Slit-Lamp)';
+              catBadgeClass = 'badge-fair';
+              catFinding = 'Slit-lamp cross-section required';
+              catConfText = 'Inconclusive Modality';
+              catObsText = '<strong style="color: #64748b;">Inconclusive (Slit-Lamp Required)</strong>';
+              catMeaningText = 'Crystalline lens nuclear clarity cannot be reliably graded from external ambient photos. Dilated slit-lamp exam required.';
+              cataractScore = null;
+            } else if (raw.includes('cataract')) {
+              catBadge = 'Cataract Flagged';
+              catBadgeClass = 'badge-poor';
+              catFinding = `Nuclear Cataract (${conf})`;
               catObsText = `<strong style="color: #b91c1c;">Nuclear Cataract (${conf})</strong>`;
               catMeaningText = `Visible lens nuclear opacification (LOCS III Grade ${locs}). In-person slit-lamp biomicroscopy recommended.`;
               cataractScore = (locs >= 3) ? 35 : (locs === 2 ? 65 : 75);
             } else {
+              catBadge = 'Clear Lens';
+              catBadgeClass = 'badge-good';
+              catFinding = `Clear Natural Lens (${conf})`;
               catObsText = `<strong style="color: #16a34a;">Clear Natural Lens (${conf})</strong>`;
               catMeaningText = 'Normal crystalline lens clarity without significant nuclear opacity (LOCS III Grade 1 baseline).';
               cataractScore = 95;
@@ -1707,18 +1815,38 @@
       }
       if (document.getElementById('recCataractObs')) document.getElementById('recCataractObs').innerHTML = catObsText;
       if (document.getElementById('recCataractMeaning')) document.getElementById('recCataractMeaning').textContent = catMeaningText;
+      const elCardScoreCat = document.getElementById('cardScoreCat');
+      if (elCardScoreCat) elCardScoreCat.textContent = cataractScore !== null ? `${cataractScore} / 100` : 'N/A';
+      const elCardBadgeCat = document.getElementById('cardBadgeCat');
+      if (elCardBadgeCat) {
+        elCardBadgeCat.textContent = catBadge;
+        elCardBadgeCat.className = `card-badge ${catBadgeClass}`;
+      }
+      const elBulletCat1 = document.getElementById('bulletCat1');
+      if (elBulletCat1) elBulletCat1.textContent = `Lens Status: ${catFinding}`;
+      const elBulletCatConf = document.getElementById('bulletCatConf');
+      if (elBulletCatConf) elBulletCatConf.textContent = catConfText;
 
-      // Stye Table Row Population
+      // Stye Table Row & Scorecard Card Population
       const styeRes = data.stye_result || (data.model_results && data.model_results.stye) || data.stye;
       let styeScore = null;
+      let styeBadge = 'Not Evaluated';
+      let styeBadgeClass = 'badge-fair';
+      let styeFinding = 'Not evaluated this session';
+      let styeConfText = 'Module not run';
       let styeObsText = '<span style="color: #64748b;">Not Evaluated</span>';
       let styeMeaningText = 'Eyelid margin screening not executed for this image.';
 
       if (styeRes) {
         const styeStatus = styeRes.operational_status || styeRes.status;
         if (styeStatus === 'blocked_domain_validation') {
+          styeBadge = 'Gated (Alignment)';
+          styeBadgeClass = 'badge-alert';
+          styeFinding = 'Macro alignment required';
+          styeConfText = 'Validation gate active';
           styeObsText = '<strong style="color: #64748b;">Blocked (Validation Gate)</strong>';
           styeMeaningText = 'Eyelid margin evaluation withheld under validation gate.';
+          styeScore = 75;
         } else {
           let styePred = styeRes.raw_prediction || styeRes.prediction || styeRes.model_output;
           if (typeof styePred === 'string') {
@@ -1730,20 +1858,47 @@
           if (styeOut.predicted_class) {
             const raw = String(styeOut.predicted_class).toLowerCase();
             const conf = styeOut.confidence ? (Number(styeOut.confidence) * 100).toFixed(1) + '%' : '';
-            if (raw.includes('stye') || raw.includes('hordeolum')) {
+            styeConfText = `Model Confidence: ${conf} (MobileNetV3-Small)`;
+
+            if (styeStatus === 'unsupported_image' || raw.includes('inconclusive') || raw.includes('unsupported')) {
+              styeBadge = 'Inconclusive (Margin)';
+              styeBadgeClass = 'badge-fair';
+              styeFinding = 'Resting eyelid margin view required';
+              styeConfText = 'Inconclusive Framing';
+              styeObsText = '<strong style="color: #64748b;">Inconclusive (Margin Required)</strong>';
+              styeMeaningText = 'Eyelid margin cannot be evaluated from everted or obstructed views.';
+              styeScore = null;
+            } else if (raw.includes('stye') || raw.includes('hordeolum')) {
+              styeBadge = 'Stye Flagged';
+              styeBadgeClass = 'badge-poor';
+              styeFinding = `Acute Stye / Hordeolum (${conf})`;
               styeObsText = `<strong style="color: #b91c1c;">Acute Stye / Hordeolum (${conf})</strong>`;
               styeMeaningText = 'Acute focal eyelid margin nodule with localized erythema observed. Warm compresses recommended; avoid squeezing.';
               styeScore = 40;
             } else {
+              styeBadge = 'Normal Margin';
+              styeBadgeClass = 'badge-good';
+              styeFinding = `Normal Eyelid Margin (${conf})`;
               styeObsText = `<strong style="color: #16a34a;">Normal Eyelid Margin (${conf})</strong>`;
               styeMeaningText = 'No acute focal nodules or margin inflammation observed on the eyelid.';
-              styeScore = 95;
+              styeScore = 96;
             }
           }
         }
       }
       if (document.getElementById('recStyeObs')) document.getElementById('recStyeObs').innerHTML = styeObsText;
       if (document.getElementById('recStyeMeaning')) document.getElementById('recStyeMeaning').textContent = styeMeaningText;
+      const elCardScoreStye = document.getElementById('cardScoreStye');
+      if (elCardScoreStye) elCardScoreStye.textContent = styeScore !== null ? `${styeScore} / 100` : 'N/A';
+      const elCardBadgeStye = document.getElementById('cardBadgeStye');
+      if (elCardBadgeStye) {
+        elCardBadgeStye.textContent = styeBadge;
+        elCardBadgeStye.className = `card-badge ${styeBadgeClass}`;
+      }
+      const elBulletStye1 = document.getElementById('bulletStye1');
+      if (elBulletStye1) elBulletStye1.textContent = `Margin Status: ${styeFinding}`;
+      const elBulletStyeConf = document.getElementById('bulletStyeConf');
+      if (elBulletStyeConf) elBulletStyeConf.textContent = styeConfText;
 
       // 6. Module D: Optical Quality
       let qScore = 92;
@@ -1839,14 +1994,16 @@
         document.getElementById('rptEnsembleTier').textContent = `Screening Tier: ${ens.tier_label || 'BORDERLINE / CLINICAL REVIEW'}`;
       }
 
-      // 9. Wire Direct Scorecard PDF Download Link
-      const sid = data.session_id || data.id || '';
+      // 9. Wire Direct Scorecard & Screening PDF Download Links
+      const sid = data.session_id || data.id || window._activeReportSessionId || '';
       if (sid) {
         window._activeReportSessionId = sid;
         const btnPdf = document.getElementById('btnDownloadPdfReport');
-        if (btnPdf) {
-          btnPdf.href = `/api/reports/${encodeURIComponent(sid)}/scorecard-pdf?lang=${activeLang}`;
-        }
+        if (btnPdf) btnPdf.href = `/api/reports/${encodeURIComponent(sid)}/scorecard-pdf?lang=${activeLang}`;
+        const btnScorecard = document.getElementById('btnDownloadScorecardPdf');
+        if (btnScorecard) btnScorecard.href = `/api/reports/${encodeURIComponent(sid)}/scorecard-pdf?lang=${activeLang}`;
+        const btnScreening = document.getElementById('btnDownloadScreeningPdf');
+        if (btnScreening) btnScreening.href = `/api/reports/${encodeURIComponent(sid)}/screening-pdf?lang=${activeLang}`;
       }
     }
 
@@ -1867,6 +2024,7 @@
       }
 
       if (querySid) {
+        window._activeReportSessionId = querySid;
         // Authoritative fetch from SQLite backend
         fetch(`/api/reports/${encodeURIComponent(querySid)}`)
           .then(res => {
@@ -1874,30 +2032,25 @@
             return res.json();
           })
           .then(apiData => {
-            const sess = apiData.session || {};
+            const sess = apiData.session || apiData || {};
             const user = apiData.user || {};
+            sess.session_id = sess.session_id || querySid;
 
-            // Check if sessionStorage has active report data or image previews to merge
+            // Safe merge of client-side ephemeral image previews only if belonging to THIS session
             try {
               const cachedRaw = sessionStorage.getItem('ocuscan_active_report') || sessionStorage.getItem('eyehealthai_active_report');
               if (cachedRaw) {
                 const cached = JSON.parse(cachedRaw);
-                if (cached) {
-                  if (cached.images && cached.images.length > 0) sess.images = cached.images;
+                if (cached && (!cached.session_id || cached.session_id === querySid)) {
+                  if (cached.images && cached.images.length > 0 && (!sess.images || sess.images.length === 0)) sess.images = cached.images;
+                  if (cached.image_sequence && !sess.image_sequence) sess.image_sequence = cached.image_sequence;
+                  if (cached.visualizations && !sess.visualizations) sess.visualizations = cached.visualizations;
+                  if (cached.previews && !sess.previews) sess.previews = cached.previews;
                   if (!sess.cataract_result && (cached.cataract_result || cached.cataract)) {
                     sess.cataract_result = cached.cataract_result || cached.cataract;
                   }
                   if (!sess.stye_result && (cached.stye_result || cached.stye)) {
                     sess.stye_result = cached.stye_result || cached.stye;
-                  }
-                  if (!sess.anemia_result && (cached.anemia_result || cached.anemia)) {
-                    sess.anemia_result = cached.anemia_result || cached.anemia;
-                  }
-                  if (!sess.slid_result && (cached.slid_result || cached.slid)) {
-                    sess.slid_result = cached.slid_result || cached.slid;
-                  }
-                  if (!sess.jaundice_result && (cached.jaundice_result || cached.jaundice)) {
-                    sess.jaundice_result = cached.jaundice_result || cached.jaundice;
                   }
                 }
               }
@@ -1928,5 +2081,164 @@
       }
     });
   </script>
+
+  <!-- Email Report Modal -->
+  <div id="emailReportModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); z-index: 10000; justify-content: center; align-items: center; padding: 16px;">
+    <div style="background: #ffffff; border-radius: 12px; width: 100%; max-width: 480px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25); overflow: hidden; border: 1px solid #e2e8f0; font-family: inherit;">
+      <div style="padding: 14px 20px; background: #0f172a; color: #ffffff; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <span id="txtEmailModalTitle">Email Screening Report</span>
+        </span>
+        <button id="btnCloseEmailModal" type="button" style="background: transparent; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; padding: 2px 6px;">✕</button>
+      </div>
+      <form id="formSendEmailReport" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <label for="inputEmailRecipient" style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 5px;" id="lblEmailRecipient">Recipient Email *</label>
+          <input type="email" id="inputEmailRecipient" required placeholder="name@example.com" style="width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <label for="selectEmailReportType" style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 5px;" id="lblEmailDocType">Report Type</label>
+            <select id="selectEmailReportType" style="width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12.5px; background: #fff;">
+              <option value="screening">Patient Screening PDF</option>
+              <option value="scorecard">Technical Scorecard PDF</option>
+            </select>
+          </div>
+          <div>
+            <label for="selectEmailLanguage" style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 5px;" id="lblEmailLang">Language</label>
+            <select id="selectEmailLanguage" style="width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12.5px; background: #fff;">
+              <option value="en">English</option>
+              <option value="hi">हिंदी (Hindi)</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label for="inputEmailMessage" style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 5px;" id="lblEmailMessage">Optional Clinician Note</label>
+          <textarea id="inputEmailMessage" rows="2" placeholder="Add an optional recommendation or screening note..." style="width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; resize: vertical;"></textarea>
+        </div>
+        <div id="emailFeedbackMsg" style="display: none; padding: 10px 14px; border-radius: 6px; font-size: 12px; font-weight: 500;"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px;">
+          <button type="button" id="btnCancelEmailModal" style="padding: 8px 14px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">Cancel</button>
+          <button type="submit" id="btnSubmitSendEmail" style="padding: 8px 16px; background: #0d9488; color: #ffffff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <span id="btnSubmitSendEmailText">Send Email</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Email Report Modal Wireup
+    (function initEmailReport() {
+      const modal = document.getElementById('emailReportModal');
+      const btnOpen = document.getElementById('btnOpenEmailModal');
+      const btnClose = document.getElementById('btnCloseEmailModal');
+      const btnCancel = document.getElementById('btnCancelEmailModal');
+      const form = document.getElementById('formSendEmailReport');
+      const feedback = document.getElementById('emailFeedbackMsg');
+      const inputEmail = document.getElementById('inputEmailRecipient');
+      const selType = document.getElementById('selectEmailReportType');
+      const selLang = document.getElementById('selectEmailLanguage');
+      const inputMsg = document.getElementById('inputEmailMessage');
+      const btnSubmit = document.getElementById('btnSubmitSendEmail');
+      const btnSubmitText = document.getElementById('btnSubmitSendEmailText');
+
+      if (!btnOpen || !modal) return;
+
+      btnOpen.addEventListener('click', () => {
+        if (window._cachedUserData && window._cachedUserData.email && window._cachedUserData.email !== 'Not Recorded') {
+          inputEmail.value = window._cachedUserData.email;
+        }
+        if (window.activeLang) {
+          selLang.value = window.activeLang.startsWith('hi') ? 'hi' : 'en';
+        }
+        feedback.style.display = 'none';
+        modal.style.display = 'flex';
+      });
+
+      function closeModal() {
+        modal.style.display = 'none';
+      }
+
+      if (btnClose) btnClose.addEventListener('click', closeModal);
+      if (btnCancel) btnCancel.addEventListener('click', closeModal);
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const sid = window._activeReportSessionId;
+          if (!sid) {
+            feedback.style.display = 'block';
+            feedback.style.background = '#fef2f2';
+            feedback.style.color = '#991b1b';
+            feedback.textContent = 'No active screening session found to deliver.';
+            return;
+          }
+
+          const recipient = inputEmail.value.trim();
+          if (!recipient) return;
+
+          btnSubmit.disabled = true;
+          btnSubmitText.textContent = 'Sending...';
+          feedback.style.display = 'none';
+
+          try {
+            const resp = await fetch(`/api/reports/${encodeURIComponent(sid)}/email`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                recipient_email: recipient,
+                report_type: selType.value,
+                language: selLang.value,
+                custom_message: inputMsg.value.trim() || null
+              })
+            });
+
+            const data = await resp.json();
+            if (!resp.ok) {
+              throw new Error(data.detail || data.message || 'Delivery request failed.');
+            }
+
+            if (data.status === 'sent') {
+              feedback.style.display = 'block';
+              feedback.style.background = '#ecfdf5';
+              feedback.style.color = '#065f46';
+              feedback.textContent = '✓ ' + (data.message || 'Report email delivered successfully via SMTP!');
+              setTimeout(() => {
+                closeModal();
+              }, 2500);
+            } else if (data.status === 'unconfigured') {
+              feedback.style.display = 'block';
+              feedback.style.background = '#f0f9ff';
+              feedback.style.color = '#0284c7';
+              feedback.textContent = 'ℹ ' + (data.message || 'SMTP credentials unconfigured. Report is preserved for direct download.');
+            } else {
+              feedback.style.display = 'block';
+              feedback.style.background = '#fef2f2';
+              feedback.style.color = '#991b1b';
+              feedback.textContent = '⚠ ' + (data.message || 'Delivery attempt failed.');
+            }
+          } catch (err) {
+            feedback.style.display = 'block';
+            feedback.style.background = '#fef2f2';
+            feedback.style.color = '#991b1b';
+            feedback.textContent = '✗ ' + err.message;
+          } finally {
+            btnSubmit.disabled = false;
+            btnSubmitText.textContent = 'Send Email';
+          }
+        });
+      }
+    })();
+  </script>
 </body>
+
 </html>

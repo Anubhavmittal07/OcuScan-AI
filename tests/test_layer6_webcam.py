@@ -288,3 +288,77 @@ def test_single_view_variation_display_logic():
     assert "Not available — one view" in js_code
     assert "viewCount > 1" in js_code
 
+
+
+def test_webcam_shared_pipeline_identical_to_upload(client, sample_webcam_frame_bytes):
+    """Verifies that a valid captured eye image processed via webcam mode produces
+    identical predictions and uses the shared multi-target pipeline as upload mode."""
+    # 1. Inference via Upload mode
+    files_upload = [("images", ("eye_test.jpg", sample_webcam_frame_bytes, "image/jpeg"))]
+    data_upload = {
+        "module": "unified",
+        "capture_source": "upload",
+        "experimental_override": "false"
+    }
+    res_upload = client.post("/api/analyze", files=files_upload, data=data_upload)
+    assert res_upload.status_code == 200
+    d_upload = res_upload.json()
+    assert d_upload["operational_status"] == "available_research_only"
+    hb_upload = d_upload["model_output"][0]["hb_pred_g_dl"]
+
+    # 2. Inference via Live Camera / Webcam mode
+    files_cam = [("images", ("webcam_capture.jpg", sample_webcam_frame_bytes, "image/jpeg"))]
+    data_cam = {
+        "module": "unified",
+        "capture_source": "webcam",
+        "experimental_override": "true"
+    }
+    res_cam = client.post("/api/analyze", files=files_cam, data=data_cam)
+    assert res_cam.status_code == 200
+    d_cam = res_cam.json()
+    assert d_cam["operational_status"] == "available_research_only"
+    assert d_cam["capture_source"] == "webcam"
+    hb_cam = d_cam["model_output"][0]["hb_pred_g_dl"]
+
+    # 3. Model outputs match exactly (shared inference pipeline)
+    assert abs(hb_upload - hb_cam) < 1e-4, f"Mismatch: upload={hb_upload}, webcam={hb_cam}"
+    assert len(d_cam["model_output"]) == len(d_upload["model_output"])
+
+    # 4. Webcam output includes clinical safety disclaimer warnings
+    assert any("unvalidated webcam" in w.lower() for w in d_cam["reliability_warnings"])
+
+
+def test_webcam_captured_image_report_generation(client, sample_webcam_frame_bytes):
+    """Verifies that report generation and PDF export succeed for webcam captures
+    with actual model predictions reflected in the document."""
+    files_cam = [("images", ("webcam_capture.jpg", sample_webcam_frame_bytes, "image/jpeg"))]
+    data_cam = {
+        "module": "unified",
+        "capture_source": "webcam",
+        "experimental_override": "true",
+        "language": "en"
+    }
+    res = client.post("/api/analyze", files=files_cam, data=data_cam)
+    assert res.status_code == 200
+    session_data = res.json()
+    sid = session_data["session_id"]
+    assert sid.startswith("session_")
+    assert session_data["operational_status"] == "available_research_only"
+    assert session_data["model_output"][0]["hb_pred_g_dl"] is not None
+
+    # Retrieve report metadata
+    rep_res = client.get(f"/api/reports/{sid}")
+    assert rep_res.status_code == 200
+    rep_json = rep_res.json()
+    assert rep_json["operational_status"] == "available_research_only"
+
+    # Export PDF in English and Hindi
+    pdf_en = client.get(f"/api/reports/{sid}/pdf?language=en")
+    assert pdf_en.status_code == 200
+    assert len(pdf_en.content) > 1000
+    assert pdf_en.content.startswith(b"%PDF")
+
+    pdf_hi = client.get(f"/api/reports/{sid}/pdf?language=hi")
+    assert pdf_hi.status_code == 200
+    assert len(pdf_hi.content) > 1000
+    assert pdf_hi.content.startswith(b"%PDF")

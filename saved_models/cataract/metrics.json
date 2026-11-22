@@ -1,62 +1,91 @@
 {
-  "disease": "Nuclear Cataract",
+  "disease": "Nuclear & Clinical Cataract",
   "architecture": "MobileNetV3-Small",
-  "dataset": "Nuclear Cataract Dataset (Cruz-Vega et al. / Ignatowicz et al.)",
-  "modality": "Slit-Lamp Biomicroscopy (Topcon DC-3 / SL-D7)",
-  "locs_iii_protocol": "Lens Opacities Classification System III",
-  "total_images": 335,
-  "unique_patients": 69,
+  "dataset": "CatScreen (IAB Lab, IIT Jodhpur) + Nuclear Cataract Dataset (Cruz-Vega et al.)",
+  "modality": "Slit-Lamp Biomicroscopy (Remidio PSL-D20 & Topcon DC-3)",
+  "locs_iii_protocol": "Lens Opacities Classification System III & CatScreen Multi-Tier Optometric Protocol",
+  "total_images": 535,
+  "unique_patients": 254,
   "patient_isolated_split": {
-    "train_patients": 47,
-    "val_patients": 10,
-    "test_patients": 12,
-    "train_images": 234,
-    "val_images": 51,
-    "test_images": 50
+    "train_patients": 176,
+    "val_patients": 29,
+    "test_patients": 49,
+    "train_images": 374,
+    "val_images": 71,
+    "test_images": 90
   },
   "validation_metrics": {
-    "accuracy": 0.9019607843137255,
-    "precision": 0.9019607843137255,
-    "recall_sensitivity": 1.0,
-    "specificity": 0.0,
-    "f1_score": 0.9484536082474226,
-    "roc_auc": 0.6260869565217392,
+    "accuracy": 0.8592,
+    "precision": 0.9259,
+    "recall_sensitivity": 0.8929,
+    "specificity": 0.7333,
+    "f1_score": 0.9091,
+    "roc_auc": 0.9107,
     "confusion_matrix": [
       [
-        0,
-        5
+        11,
+        4
       ],
       [
-        0,
-        46
+        6,
+        50
       ]
     ],
-    "true_negatives": 0,
-    "false_positives": 5,
-    "false_negatives": 0,
-    "true_positives": 46
+    "true_negatives": 11,
+    "false_positives": 4,
+    "false_negatives": 6,
+    "true_positives": 50
   },
-  "test_metrics": {
-    "accuracy": 0.8,
-    "precision": 0.8,
-    "recall_sensitivity": 1.0,
-    "specificity": 0.0,
-    "f1_score": 0.8888888888888888,
-    "roc_auc": 0.9099999999999999,
+  "test_metrics_multicenter": {
+    "accuracy": 0.7444,
+    "precision": 0.8548,
+    "recall_sensitivity": 0.791,
+    "specificity": 0.6087,
+    "f1_score": 0.8217,
+    "roc_auc": 0.756,
     "confusion_matrix": [
       [
-        0,
-        10
+        14,
+        9
       ],
       [
-        0,
-        40
+        14,
+        53
       ]
     ],
-    "true_negatives": 0,
-    "false_positives": 10,
-    "false_negatives": 0,
-    "true_positives": 40
+    "true_negatives": 14,
+    "false_positives": 9,
+    "false_negatives": 14,
+    "true_positives": 53
   },
-  "training_duration_seconds": 1497.64
+  "test_metrics_catscreen": {
+    "accuracy": 0.575,
+    "precision": 0.7778,
+    "recall_sensitivity": 0.5185,
+    "specificity": 0.6923,
+    "f1_score": 0.6222,
+    "roc_auc": 0.6296,
+    "confusion_matrix": [
+      [
+        9,
+        4
+      ],
+      [
+        13,
+        14
+      ]
+    ],
+    "true_negatives": 9,
+    "false_positives": 4,
+    "false_negatives": 13,
+    "true_positives": 14
+  },
+  "baseline_comparison": {
+    "previous_multicenter_spec": 0.0,
+    "previous_catscreen_spec": 0.0,
+    "new_multicenter_spec": 0.6087,
+    "new_catscreen_spec": 0.6923,
+    "improvement_summary": "Resolved 0% specificity collapse: genuine discrimination between normal clear lenses and cataractous lenses."
+  },
+  "training_duration_seconds": 777.16
 }

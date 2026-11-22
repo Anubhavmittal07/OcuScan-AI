@@ -58,6 +58,7 @@ class UserProfile(Base):
     pregnancy_trimester = Column(Integer, nullable=True)  # 1, 2, or 3
     external_ai_consent = Column(Boolean, nullable=False, default=False)
     demographic_consent = Column(Boolean, nullable=False, default=False)
+    email_delivery_consent = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
 
@@ -83,6 +84,7 @@ class UserProfile(Base):
             "data_storage_consent": has_storage,
             "external_ai_consent": self.external_ai_consent,
             "demographic_consent": self.demographic_consent,
+            "email_delivery_consent": self.email_delivery_consent,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 
@@ -101,6 +103,7 @@ class ConsentRecord(Base):
     data_storage_consent = Column(Boolean, nullable=False, default=True)
     demographic_consent = Column(Boolean, nullable=False, default=False)
     external_ai_consent = Column(Boolean, nullable=False, default=False)
+    email_delivery_consent = Column(Boolean, nullable=False, default=True)
     consent_version = Column(String(16), nullable=False, default="2.0")
     timestamp = Column(DateTime(timezone=True), default=utc_now, nullable=False, index=True)
 
@@ -116,6 +119,7 @@ class ConsentRecord(Base):
             "data_storage_consent": self.data_storage_consent,
             "demographic_consent": self.demographic_consent,
             "external_ai_consent": self.external_ai_consent,
+            "email_delivery_consent": self.email_delivery_consent,
             "consent_version": self.consent_version,
             "timestamp": self.timestamp.isoformat() if self.timestamp else None,
         }
@@ -228,6 +232,11 @@ class ReportMetadata(Base):
     generated_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
     pdf_filename = Column(String(128), nullable=True)
     status = Column(String(16), nullable=False, default="active")  # active, purged
+    email_delivery_status = Column(String(32), nullable=True, default=None)  # sent, failed, unconfigured, no_consent
+    email_recipient = Column(String(128), nullable=True, default=None)
+    email_dispatched_at = Column(DateTime(timezone=True), nullable=True, default=None)
+    email_error_message = Column(Text, nullable=True, default=None)
+    email_retry_count = Column(Integer, nullable=False, default=0)
 
     # Relationship
     session = relationship("ScreeningSession", back_populates="reports")
@@ -241,4 +250,9 @@ class ReportMetadata(Base):
             "generated_at": self.generated_at.isoformat() if self.generated_at else None,
             "pdf_filename": self.pdf_filename,
             "status": self.status,
+            "email_delivery_status": self.email_delivery_status,
+            "email_recipient": self.email_recipient,
+            "email_dispatched_at": self.email_dispatched_at.isoformat() if self.email_dispatched_at else None,
+            "email_error_message": self.email_error_message,
+            "email_retry_count": self.email_retry_count,
         }

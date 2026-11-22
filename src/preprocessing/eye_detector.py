@@ -210,10 +210,10 @@ def detect_ocular_region(
     ex, ey, ew, eh = [int(v) for v in best_eye]
 
     # Step 4: Expand eye bounding box to include surrounding sclera, lids, and conjunctiva
-    # Expand horizontally by 35% on each side, vertically by 35% on top and 45% on bottom (for palpebral conjunctiva)
-    pad_x = int(ew * 0.35)
-    pad_top = int(eh * 0.35)
-    pad_bot = int(eh * 0.45)
+    # Generous anatomical padding: preserves both upper and lower eyelids, cilia margins, and palpebral folds
+    pad_x = int(ew * 0.75)
+    pad_top = int(max(eh * 1.5, ew * 0.85))
+    pad_bot = int(max(eh * 1.8, ew * 0.95))
 
     cx = max(0, ex - pad_x)
     cy = max(0, ey - pad_top)

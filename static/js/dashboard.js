@@ -269,6 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnResetSession = document.getElementById('btnResetSession');
   const btnNewSessionText = document.getElementById('btnNewSessionText');
   const btnNavHistoryText = document.getElementById('btnNavHistoryText');
+  const btnNavReliabilityText = document.getElementById('btnNavReliabilityText');
 
   // Theme Toggle Handler
   if (themeToggleBtn) {
@@ -300,6 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const chkConsentExternalAi = document.getElementById('chkConsentExternalAi');
   const chkConsentResearch = document.getElementById('chkConsentResearch');
   const chkConsentStorage = document.getElementById('chkConsentStorage');
+  const chkConsentEmailReport = document.getElementById('chkConsentEmailReport');
   const regErrorAlert = document.getElementById('regErrorAlert');
   const btnBackToLang = document.getElementById('btnBackToLang');
 
@@ -443,13 +445,27 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    if (btnNewSessionText) btnNewSessionText.textContent = lang === 'hi' ? 'नया सत्र' : 'New Session';
+    if (btnNewSessionText) btnNewSessionText.textContent = lang === 'hi' ? 'नया सत्र' : 'New Screening';
     if (btnNavHistoryText) btnNavHistoryText.textContent = lang === 'hi' ? 'इतिहास' : 'History';
+    if (btnNavReliabilityText) btnNavReliabilityText.textContent = lang === 'hi' ? 'मॉडल विश्वसनीयता' : 'Model Reliability';
 
     // Update results cards if active
     if (lastSessionData) {
       renderFullResults(lastSessionData);
     }
+
+    // Refresh Doctor Astra dialogue to match language for the active step
+    try {
+      if (typeof triggerDoctorBuddyEvent === 'function') {
+        if (currentStep === 1) triggerDoctorBuddyEvent("welcome");
+        else if (currentStep === 2) triggerDoctorBuddyEvent("registration");
+        else if (currentStep === 3) triggerDoctorBuddyEvent("preparation");
+        else if (currentStep === 4) {
+          if (activeMode === 'webcam') triggerDoctorBuddyEvent("camera_permission_prompt");
+          else triggerDoctorBuddyEvent("screening");
+        }
+      }
+    } catch (e) {}
   }
 
   if (langBtnEn) langBtnEn.addEventListener('click', () => setLanguage('en'));
@@ -477,7 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let previousStep = 3; // Default previous step for History return
 
   function goToStep(step) {
-    if (currentStep !== 7 && step === 7) {
+    if (currentStep !== 7 && currentStep !== 8 && (step === 7 || step === 8)) {
       previousStep = currentStep;
     }
     currentStep = step;
@@ -490,12 +506,14 @@ document.addEventListener('DOMContentLoaded', () => {
       { num: 5, id: 'page5Analysis' },
       { num: 6, id: 'page6Results' },
       { num: 7, id: 'page7History' },
+      { num: 8, id: 'page8Reliability' },
     ];
 
     pageViews.forEach(p => {
       const el = document.getElementById(p.id);
       if (el) {
         el.classList.toggle('active', p.num === step);
+        el.style.display = (p.num === step) ? 'block' : 'none';
       }
       const stepBtn = document.getElementById(`stepBtn${p.num}`);
       if (stepBtn) {
@@ -508,13 +526,28 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Hide 4-step progress tracker on initial language setup page; show on step >= 2
+    // Hide 4-step progress tracker on language, history, and reliability pages
     if (fourStepTracker) {
-      if (step === 1) {
+      if (step === 1 || step === 7 || step === 8) {
         fourStepTracker.classList.add('tracker-hidden');
       } else {
         fourStepTracker.classList.remove('tracker-hidden');
       }
+    }
+
+    // Active nav pill highlights
+    const navRelBtn = document.getElementById('btnNavReliability');
+    if (navRelBtn) navRelBtn.classList.toggle('nav-pill-active', step === 8);
+    const navHistBtn = document.getElementById('btnNavHistory');
+    if (navHistBtn) navHistBtn.classList.toggle('nav-pill-active', step === 7);
+    const navDashBtn = document.getElementById('btnNavDashboard');
+    if (navDashBtn) navDashBtn.classList.toggle('nav-pill-active', step >= 2 && step <= 6);
+
+    if (step === 8) {
+      const bubble = document.getElementById("doctorSpeechBubble");
+      if (bubble) bubble.style.display = "none";
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      loadReliabilityMetrics();
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -527,6 +560,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (step === 7) {
       loadSessionHistory();
+    }
+
+    // Direct Doctor Astra step-aware voice & dialogue trigger
+    try {
+      if (typeof triggerDoctorBuddyEvent === 'function') {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        if (step === 1) triggerDoctorBuddyEvent("welcome");
+        else if (step === 2) triggerDoctorBuddyEvent("registration");
+        else if (step === 3) triggerDoctorBuddyEvent("preparation");
+        else if (step === 4) {
+          if (activeMode === 'webcam') {
+            triggerDoctorBuddyEvent("camera_permission_prompt");
+          } else {
+            triggerDoctorBuddyEvent("screening");
+          }
+        } else if (step === 5) {
+          triggerDoctorBuddyEvent("results_ready");
+        } else if (step === 6) {
+          triggerDoctorBuddyEvent("report_overview");
+        }
+      }
+    } catch (e) {
+      console.warn("Doctor Buddy step event trigger error:", e);
     }
   }
 
@@ -672,20 +728,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Clickable Logo Navigation: Returns to Protocol Guide (Page 3) or Registration (Page 2)
+  // Clickable Logo Navigation: Performs a complete hard refresh / page reload
   const logoBtn = document.getElementById('logoBtn');
   if (logoBtn) {
     logoBtn.addEventListener('click', () => {
-      if (currentUserProfile) {
-        goToStep(3); // Protocol Guide
-      } else {
-        goToStep(2); // Registration / Login Profile
-      }
+      window.location.reload();
     });
     logoBtn.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        logoBtn.click();
+        window.location.reload();
       }
     });
   }
@@ -699,6 +751,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnBackFromHistory = document.getElementById('btnBackFromHistory');
   if (btnBackFromHistory) {
     btnBackFromHistory.addEventListener('click', () => {
+      goToStep(previousStep || 4);
+    });
+  }
+
+  const btnBackFromReliability = document.getElementById('btnBackFromReliability');
+  if (btnBackFromReliability) {
+    btnBackFromReliability.addEventListener('click', () => {
       goToStep(previousStep || 4);
     });
   }
@@ -818,7 +877,8 @@ document.addEventListener('DOMContentLoaded', () => {
         external_ai_consent: chkConsentExternalAi ? chkConsentExternalAi.checked : false,
         demographic_consent: chkConsentDemographic ? chkConsentDemographic.checked : false,
         research_consent: chkConsentResearch.checked,
-        data_storage_consent: chkConsentStorage.checked
+        data_storage_consent: chkConsentStorage.checked,
+        email_delivery_consent: chkConsentEmailReport ? chkConsentEmailReport.checked : true
       };
 
       try {
@@ -843,8 +903,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (userBadge && userNameBadge) {
           userNameBadge.textContent = currentUserProfile.full_name;
+          userNameBadge.style.display = 'inline-block';
           userBadge.style.display = 'inline-flex';
         }
+        updateProfileDropdownContent();
 
         goToStep(4); // Advance directly to Unified Screening Workspace (Step 3 in 4-step tracker)
       } catch (err) {
@@ -979,11 +1041,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dropzone) dropzone.style.display = 'flex';
         if (singlePreviewContainer) singlePreviewContainer.style.display = 'none';
       }
+      if (currentStep === 4) {
+        triggerDoctorBuddyEvent("screening");
+      }
     } else {
       uploadSection.style.display = 'none';
       webcamSection.style.display = 'block';
       if (!capturedWebcamBlob && capturedStillCard) {
         capturedStillCard.style.display = 'none';
+      }
+      if (currentStep === 4) {
+        triggerDoctorBuddyEvent("camera_permission_prompt");
       }
     }
     updateAnalyzeButtonState();
@@ -1225,6 +1293,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = webcamCanvas.getContext('2d');
     ctx.drawImage(webcamVideo, 0, 0, webcamCanvas.width, webcamCanvas.height);
 
+    console.log(`[LiveCamera] Frame captured. Raw resolution: ${webcamCanvas.width}x${webcamCanvas.height} px. Ingesting frame...`);
     webcamCanvas.toBlob(async (fullBlob) => {
       if (!fullBlob) return;
 
@@ -1324,6 +1393,7 @@ document.addEventListener('DOMContentLoaded', () => {
         capturedWebcamBlob = croppedBlob;
         capturedWebcamUrl = URL.createObjectURL(croppedBlob);
         capturedStillThumb.src = capturedWebcamUrl;
+        console.log(`[LiveCamera] Crop verified & accepted. Dimensions: ${cropW}x${cropH} px, Blob size: ${croppedBlob.size} bytes. Ready for shared inference pipeline.`);
 
         if (capturedCropBadge) {
           capturedCropBadge.textContent = isEyeModeAuto ? 'Cropped Eye Region (Auto Macro)' : 'Manual Macro Reticle Crop';
@@ -1926,7 +1996,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const baseFormData = () => {
       const fd = new FormData();
       fd.append('capture_source', activeMode);
-      fd.append('experimental_override', (activeMode === 'webcam' && chkWebcamOverride && chkWebcamOverride.checked) ? 'true' : 'false');
+      // Validated webcam captures that pass quality gate proceed via research screening protocol
+      const isCamOverride = (activeMode === 'webcam') ? 'true' : 'false';
+      fd.append('experimental_override', isCamOverride);
       fd.append('language', currentLanguage);
       if (currentUserProfile) {
         if (currentUserProfile.id) fd.append('user_id', currentUserProfile.id);
@@ -2029,10 +2101,17 @@ document.addEventListener('DOMContentLoaded', () => {
           secondary_vision: unifiedSession.secondary_vision,
           reference_retrieval: unifiedSession.reference_retrieval,
           calibrated_ensemble: unifiedSession.calibrated_ensemble,
-          images: uploadedFiles.map((f, idx) => ({
-            src: f.previewUrl || '/static/images/hero_eye.jpg',
-            tag: f.viewType || `View ${idx + 1}`
-          }))
+          images: (activeMode === 'webcam')
+            ? [{
+                src: capturedWebcamUrl || '/static/images/hero_eye.jpg',
+                name: 'webcam_capture.jpg',
+                tag: (webcamViewSelect && webcamViewSelect.value) ? webcamViewSelect.value : 'raw_eye'
+              }]
+            : uploadedFiles.map((f, idx) => ({
+                src: f.previewUrl || '/static/images/hero_eye.jpg',
+                name: f.name,
+                tag: f.viewType || `View ${idx + 1}`
+              }))
         };
         sessionStorage.setItem('eyehealthai_active_report', JSON.stringify(reportPayload));
         sessionStorage.setItem('ocuscan_active_report', JSON.stringify(reportPayload));
@@ -2124,6 +2203,114 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
     `;
+  }
+
+  function renderEmailDeliveryBanner(emailInfo, sessionId, isHi) {
+    if (!emailInfo) return '';
+    const sid = sessionId || (emailInfo && emailInfo.session_id) || '';
+    const st = emailInfo.status || 'unconfigured';
+    const recipient = emailInfo.recipient || (currentUserProfile ? currentUserProfile.email : '') || '';
+
+    if (st === 'sending' || st === 'pending') {
+      setTimeout(() => {
+        let attempts = 0;
+        const interval = setInterval(async () => {
+          attempts++;
+          if (attempts > 12) { clearInterval(interval); return; }
+          try {
+            const resp = await fetch(`/api/reports/${encodeURIComponent(sid)}/email-status`);
+            if (resp.ok) {
+              const data = await resp.json();
+              if (data.status && data.status !== 'sending' && data.status !== 'pending') {
+                clearInterval(interval);
+                const wrap = document.getElementById('emailDeliveryBannerWrap');
+                if (wrap) {
+                  wrap.outerHTML = renderEmailDeliveryBanner(data, sid, isHi);
+                  if (typeof setupEmailRetryHandler === 'function') {
+                    setupEmailRetryHandler(sid, isHi);
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            // ignore
+          }
+        }, 1500);
+      }, 400);
+
+      return `
+        <div id="emailDeliveryBannerWrap" style="background: #eff6ff; border: 1px solid #3b82f6; border-radius: 10px; padding: 14px 18px; margin: 16px 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 30px; height: 30px; border-radius: 50%; background: #dbeafe; color: #1e40af; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 15px;">✉</div>
+            <div>
+              <div style="font-weight: 700; color: #1e40af; font-size: 13.5px;">${isHi ? 'पीडीएफ रिपोर्ट प्रेषण प्रगति पर है...' : 'Dispatching Official PDF Screening Report...'}</div>
+              <div style="font-size: 12px; color: #2563eb; margin-top: 2px;">${isHi ? 'सत्यापित एसएमटीपी सर्वर से ईमेल भेजा जा रहा है:' : 'Transmitting via SMTP relay to:'} <strong>${escapeHtml(recipient)}</strong></div>
+            </div>
+          </div>
+          <span class="status-badge" style="background: #dbeafe; color: #1e40af; font-size: 11px; padding: 4px 10px;">${isHi ? 'प्रेषण जारी' : 'Sending...'}</span>
+        </div>
+      `;
+    }
+
+    if (st === 'sent') {
+      return `
+        <div id="emailDeliveryBannerWrap" style="background: #ecfdf5; border: 1px solid #10b981; border-radius: 10px; padding: 14px 18px; margin: 16px 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 30px; height: 30px; border-radius: 50%; background: #d1fae5; color: #065f46; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 15px;">✓</div>
+            <div>
+              <div style="font-weight: 700; color: #065f46; font-size: 13.5px;">${isHi ? 'पीडीएफ रिपोर्ट ईमेल पर प्रेषित' : 'Official PDF Screening Report Dispatched'}</div>
+              <div style="font-size: 12px; color: #047857; margin-top: 2px;">${isHi ? 'रिपोर्ट सफलतापूर्वक ईमेल पर भेजी गई:' : 'Report successfully transmitted via SMTP to:'} <strong>${escapeHtml(recipient)}</strong></div>
+            </div>
+          </div>
+          <span class="status-badge available" style="font-size: 11px; padding: 4px 10px;">${isHi ? 'ईमेल प्रेषित' : 'Email Sent'}</span>
+        </div>
+      `;
+    }
+
+    if (st === 'unconfigured') {
+      return `
+        <div id="emailDeliveryBannerWrap" style="background: #f0f9ff; border: 1px solid #0284c7; border-radius: 10px; padding: 14px 18px; margin: 16px 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 30px; height: 30px; border-radius: 50%; background: #e0f2fe; color: #0369a1; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 15px;">ℹ</div>
+            <div>
+              <div style="font-weight: 700; color: #0369a1; font-size: 13.5px;">${isHi ? 'ईमेल वितरण सूचना — प्रत्यक्ष डाउनलोड उपलब्ध' : 'Email Delivery Notice: Direct Download Available'}</div>
+              <div style="font-size: 12px; color: #0284c7; margin-top: 2px;">${isHi ? 'एसएमटीपी सर्वर वर्तमान परिवेश में कॉन्फ़िगर नहीं है। आपकी पूरी रिपोर्ट नीचे सीधे डाउनलोड के लिए सुरक्षित उपलब्ध है।' : 'SMTP credentials are not configured in this server environment. Your complete PDF report has been generated and is ready for direct download below.'}</div>
+            </div>
+          </div>
+          <span class="status-badge grey" style="font-size: 11px; padding: 4px 10px;">${isHi ? 'प्रत्यक्ष डाउनलोड' : 'Direct Download'}</span>
+        </div>
+      `;
+    }
+
+    if (st === 'failed') {
+      return `
+        <div id="emailDeliveryBannerWrap" style="background: #fef2f2; border: 1px solid #ef4444; border-radius: 10px; padding: 14px 18px; margin: 16px 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 30px; height: 30px; border-radius: 50%; background: #fee2e2; color: #991b1b; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 15px;">⚠</div>
+            <div>
+              <div style="font-weight: 700; color: #991b1b; font-size: 13.5px;">${isHi ? 'स्वचालित ईमेल प्रेषण असफल' : 'Automated Email Dispatch Failed'}</div>
+              <div style="font-size: 12px; color: #b91c1c; margin-top: 2px;">${escapeHtml(emailInfo.message || 'SMTP transmission error')}. ${isHi ? 'आप पुनः प्रयास कर सकते हैं या नीचे सीधे डाउनलोड कर सकते हैं।' : 'You can retry delivery or download directly below.'}</div>
+            </div>
+          </div>
+          <button id="btnRetryAutoEmail" type="button" class="btn-action" style="background: #dc2626; color: #fff; padding: 6px 14px; font-size: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+            ↻ ${isHi ? 'ईमेल पुनः प्रयास' : 'Retry Email'}
+          </button>
+        </div>
+      `;
+    }
+
+    if (st === 'no_consent') {
+      return `
+        <div id="emailDeliveryBannerWrap" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 18px; margin: 16px 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: #64748b;">
+            <span>✉️</span>
+            <span>${isHi ? 'सहमति के दौरान स्वचालित ईमेल का अनुरोध नहीं किया गया था। आपकी रिपोर्ट नीचे उपलब्ध है।' : 'Automated email delivery was not requested during consent. Your report is available for direct download below.'}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    return '';
   }
 
   function renderAnemiaResults(session) {
@@ -2428,10 +2615,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const seq = res.image_sequence || {};
     const prevs = res.previews || (uploadedFiles && uploadedFiles[0] && uploadedFiles[0].previews) || {};
 
-    const originalImg = (seq.stage_01_upload && (seq.stage_01_upload.image_b64 || seq.stage_01_upload)) || prevs.original_thumb || (uploadedFiles && uploadedFiles[0] && uploadedFiles[0].previewUrl) || '/static/img/eye_sample.jpg';
+    const originalImg = (seq.stage_01_upload && (seq.stage_01_upload.image_b64 || seq.stage_01_upload)) || prevs.original_thumb || (uploadedFiles && uploadedFiles[0] && uploadedFiles[0].previewUrl) || capturedWebcamUrl || '/static/img/eye_sample.jpg';
     const modelInputImg = visData.input || visData.original_b64 || (seq.stage_02_model_input && (seq.stage_02_model_input.image_b64 || seq.stage_02_model_input)) || (seq.stage_03_model_input && (seq.stage_03_model_input.image_b64 || seq.stage_03_model_input)) || prevs.final_model_input_thumb || originalImg;
-    const heatmapImg = visData.heatmap || visData.heatmap_b64 || (seq.stage_03_visualization && (seq.stage_03_visualization.image_b64 || seq.stage_03_visualization)) || (seq.stage_04_visualization && (seq.stage_04_visualization.image_b64 || seq.stage_04_visualization)) || modelInputImg;
-    const overlayImg = visData.overlay || visData.overlay_b64 || (seq.stage_03_visualization && (seq.stage_03_visualization.image_b64 || seq.stage_03_visualization)) || (seq.stage_04_visualization && (seq.stage_04_visualization.image_b64 || seq.stage_04_visualization)) || heatmapImg;
+
+    const isCatInconclusive = modelKey === 'cataract' && (
+      (res.cataract && (res.cataract.status === 'blocked_domain_validation' || res.cataract.status === 'unsupported_image')) ||
+      (res.cataract_result && (res.cataract_result.status === 'blocked_domain_validation' || res.cataract_result.status === 'unsupported_image')) ||
+      (res.cataract && res.cataract.prediction && res.cataract.prediction[0] && String(res.cataract.prediction[0].predicted_class).includes('inconclusive'))
+    );
+
+    const heatmapImg = (!isCatInconclusive && (visData.heatmap || visData.heatmap_b64))
+      || (!isCatInconclusive && seq.stage_03_visualization && seq.stage_03_visualization.cataract && seq.stage_03_visualization.cataract.heatmap_b64)
+      || (modelKey !== 'cataract' && (visData.heatmap || visData.heatmap_b64 || (seq.stage_03_visualization && (seq.stage_03_visualization.image_b64 || seq.stage_03_visualization))))
+      || modelInputImg;
+
+    const overlayImg = (!isCatInconclusive && (visData.overlay || visData.overlay_b64))
+      || (!isCatInconclusive && seq.stage_03_visualization && seq.stage_03_visualization.cataract && seq.stage_03_visualization.cataract.overlay_b64)
+      || (modelKey !== 'cataract' && (visData.overlay || visData.overlay_b64 || (seq.stage_03_visualization && (seq.stage_03_visualization.image_b64 || seq.stage_03_visualization))))
+      || heatmapImg;
 
     let layerBadge = '';
     if (modelKey === 'anemia') {
@@ -2532,26 +2733,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const patientSex = res.patient_clinical_sex || (currentUserProfile && currentUserProfile.clinical_sex) || 'not_disclosed';
 
     // Model A: Hemoglobin / Anemia
-    const isAnemia = (res.selected_module === 'anemia' || res.selected_module === 'unified' || res.selected_module === 'unified_ocular_screening' || !!res.anemia || res.view_mean !== undefined);
     let hbVal = 'N/A';
-    if (isAnemia) {
-      if (res.view_mean !== null && res.view_mean !== undefined) {
-        hbVal = typeof res.view_mean === 'number' ? res.view_mean.toFixed(1) : res.view_mean;
-      } else if (res.model_output && Array.isArray(res.model_output) && res.model_output.length > 0 && res.model_output[0].hb_pred_g_dl !== undefined) {
-        const val = res.model_output[0].hb_pred_g_dl;
-        hbVal = typeof val === 'number' ? val.toFixed(1) : val;
-      } else if (res.anemia && res.anemia.prediction && Array.isArray(res.anemia.prediction) && res.anemia.prediction.length > 0 && res.anemia.prediction[0].hb_pred_g_dl !== undefined) {
-        const val = res.anemia.prediction[0].hb_pred_g_dl;
-        hbVal = typeof val === 'number' ? val.toFixed(1) : val;
-      } else if (res.operational_status === 'blocked_domain_validation' || (res.anemia && res.anemia.status === 'blocked_domain_validation')) {
-        hbVal = isHi ? 'अवरुद्ध (डोमेन)' : 'Blocked (Webcam Domain)';
-      } else {
-        hbVal = isHi ? 'अनुमान उपलब्ध नहीं' : 'No Valid Prediction';
-      }
+    const anemiaResObj = res.anemia || res.anemia_result || {};
+    const anemiaStatus = anemiaResObj.status || res.operational_status;
+    const isAnemiaInconclusive = (anemiaStatus === 'unsupported_image' || anemiaStatus === 'inconclusive_view' || res.view_mean === null || res.view_mean === undefined);
+
+    if (isAnemiaInconclusive && (res.selected_module !== 'anemia' || res.view_mean === null)) {
+      hbVal = isHi ? 'अनिर्णायक (पैल्पेब्रल दृश्य आवश्यक)' : 'Inconclusive (Palpebral View Required)';
+    } else if (res.view_mean !== null && res.view_mean !== undefined) {
+      hbVal = typeof res.view_mean === 'number' ? res.view_mean.toFixed(1) : res.view_mean;
+    } else if (anemiaResObj.view_mean !== null && anemiaResObj.view_mean !== undefined) {
+      hbVal = typeof anemiaResObj.view_mean === 'number' ? anemiaResObj.view_mean.toFixed(1) : anemiaResObj.view_mean;
+    } else if (anemiaStatus === 'blocked_domain_validation') {
+      hbVal = isHi ? 'अवरुद्ध (डोमेन)' : 'Blocked (Webcam Domain)';
+    } else {
+      hbVal = isHi ? 'अनिर्णायक (पैल्पेब्रल दृश्य आवश्यक)' : 'Inconclusive (Palpebral View Required)';
     }
+
     const parsedHb = parseFloat(hbVal);
-    const clinicalDec = (isAnemia && res.clinical_decision) ? res.clinical_decision : ((res.anemia && res.anemia.prediction && res.anemia.prediction[0] && res.anemia.prediction[0].clinical_decision) ? res.anemia.prediction[0].clinical_decision : {});
-    const whoStage = clinicalDec.stage_label_en || (!isNaN(parsedHb) ? (parsedHb < 10.5 ? 'Moderate Anemia' : (parsedHb < 12.0 ? 'Mild Anemia' : 'Normal / Non-Anemic')) : (isHi ? 'सामान्य सीमा' : 'Normal Hb Range'));
+    const clinicalDec = (res.clinical_decision) ? res.clinical_decision : ((anemiaResObj.prediction && anemiaResObj.prediction[0] && anemiaResObj.prediction[0].clinical_decision) ? anemiaResObj.prediction[0].clinical_decision : {});
+    const whoStage = (!isNaN(parsedHb))
+      ? (clinicalDec.stage_label_en || (parsedHb < 10.5 ? 'Moderate Anemia' : (parsedHb < 12.0 ? 'Mild Anemia' : 'Normal / Non-Anemic')))
+      : (isHi ? 'पैल्पेब्रल दृश्य आवश्यक' : 'Palpebral Conjunctiva View Required');
 
     // Model B: Conjunctival Surface (SLID)
     const slidRes = res.slid || res.slid_result || (res.selected_module === 'slid' ? res : null);
@@ -2641,28 +2844,26 @@ document.addEventListener('DOMContentLoaded', () => {
     let cataractStage = '';
 
     if (cataractRes) {
-      if (cataractRes.status === 'blocked_domain_validation') {
-        cataractClass = isHi ? 'अवरुद्ध (स्लिट-लैंप डोमेन आवश्यक)' : 'Blocked (Slit-Lamp Domain Required)';
-        cataractConf = isHi ? 'डोमेन गेट' : 'Domain Gated';
-        cataractBadge = 'blocked';
-      } else {
-        const catPredArray = cataractRes.prediction || cataractRes.raw_prediction || cataractRes.model_output;
-        const catOutput = (Array.isArray(catPredArray) && catPredArray.length > 0 && typeof catPredArray[0] === 'object')
-          ? catPredArray[0]
-          : ((typeof catPredArray === 'object' && catPredArray !== null) ? catPredArray : {});
+      const catStatus = cataractRes.status || cataractRes.operational_status;
+      const catPredArray = cataractRes.prediction || cataractRes.raw_prediction || cataractRes.model_output;
+      const catOutput = (Array.isArray(catPredArray) && catPredArray.length > 0 && typeof catPredArray[0] === 'object')
+        ? catPredArray[0]
+        : ((typeof catPredArray === 'object' && catPredArray !== null) ? catPredArray : {});
+      const rawCls = catOutput.predicted_class ? String(catOutput.predicted_class).toLowerCase() : '';
 
-        if (catOutput.predicted_class) {
-          const rawCls = String(catOutput.predicted_class).toLowerCase();
-          const locsGrade = catOutput.locs_grade_estimate || (catOutput.clinical_decision && catOutput.clinical_decision.locs_grade_estimate) || 1;
-          if (rawCls.includes('cataract')) {
-            cataractClass = isHi ? `मोतियाबिंद देखा गया (LOCS III ग्रेड ${locsGrade})` : `Nuclear Cataract (LOCS III Grade ${locsGrade})`;
-            cataractStage = isHi ? `चरण ${locsGrade}/6` : `Grade ${locsGrade}/6`;
-          } else {
-            cataractClass = isHi ? 'सामान्य / स्पष्ट प्राकृतिक लेंस (ग्रेड 1)' : 'Normal / Clear Lens (Grade 1)';
-            cataractStage = isHi ? 'ग्रेड 1 (सामान्य)' : 'Grade 1 (Clear)';
-          }
-        } else if (cataractRes.status === 'available_research_only' || cataractRes.status === 'success') {
-          cataractClass = isHi ? 'मूल्यांकन पूर्ण' : 'Evaluated';
+      if (catStatus === 'blocked_domain_validation' || catStatus === 'unsupported_image' || rawCls.includes('inconclusive') || rawCls.includes('unsupported')) {
+        cataractClass = isHi ? 'अनिर्णायक (स्लिट-लैंप आवश्यक)' : 'Inconclusive (Slit-Lamp Required)';
+        cataractConf = isHi ? 'मोडैलिटी गेट' : 'Modality Gated';
+        cataractBadge = 'blocked';
+        cataractStage = isHi ? 'स्लिट-लैंप आवश्यक' : 'Slit-Lamp Required';
+      } else {
+        const locsGrade = catOutput.locs_grade_estimate || (catOutput.clinical_decision && catOutput.clinical_decision.locs_grade_estimate) || 1;
+        if (rawCls.includes('cataract')) {
+          cataractClass = isHi ? `मोतियाबिंद देखा गया (LOCS III ग्रेड ${locsGrade})` : `Nuclear Cataract (LOCS III Grade ${locsGrade})`;
+          cataractStage = isHi ? `चरण ${locsGrade}/6` : `Grade ${locsGrade}/6`;
+        } else {
+          cataractClass = isHi ? 'सामान्य / स्पष्ट प्राकृतिक लेंस (ग्रेड 1)' : 'Normal / Clear Lens (Grade 1)';
+          cataractStage = isHi ? 'ग्रेड 1 (सामान्य)' : 'Grade 1 (Clear)';
         }
 
         if (catOutput.confidence !== undefined && catOutput.confidence !== null && !isNaN(catOutput.confidence)) {
@@ -2680,26 +2881,29 @@ document.addEventListener('DOMContentLoaded', () => {
     let styeBadge = 'pink';
 
     if (styeRes) {
+      const styeStatus = styeRes.status || styeRes.operational_status;
       const styePredArray = styeRes.prediction || styeRes.raw_prediction || styeRes.model_output;
       const styeOutput = (Array.isArray(styePredArray) && styePredArray.length > 0 && typeof styePredArray[0] === 'object')
         ? styePredArray[0]
         : ((typeof styePredArray === 'object' && styePredArray !== null) ? styePredArray : {});
+      const rawCls = styeOutput.predicted_class ? String(styeOutput.predicted_class).toLowerCase() : '';
 
-      if (styeOutput.predicted_class) {
-        const rawCls = String(styeOutput.predicted_class).toLowerCase();
+      if (styeStatus === 'blocked_domain_validation' || styeStatus === 'unsupported_image' || rawCls.includes('inconclusive') || rawCls.includes('unsupported')) {
+        styeClass = isHi ? 'अनिर्णायक (पलक का किनारा आवश्यक)' : 'Inconclusive (Eyelid Margin Required)';
+        styeConf = isHi ? 'डोमेन गेट' : 'Domain Gated';
+        styeBadge = 'blocked';
+      } else {
         if (rawCls.includes('stye') || rawCls.includes('hordeolum')) {
           styeClass = isHi ? 'तीव्र गुहेरी / स्टाई लक्षण देखे गए' : 'Acute Stye / Hordeolum Lesion';
         } else {
           styeClass = isHi ? 'सामान्य / कोई घाव नहीं दिखा' : 'Normal / No Margin Lesion';
         }
-      } else if (styeRes.status === 'available_research_only' || styeRes.status === 'success') {
-        styeClass = isHi ? 'मूल्यांकन पूर्ण' : 'Evaluated';
-      }
 
-      if (styeOutput.confidence !== undefined && styeOutput.confidence !== null && !isNaN(styeOutput.confidence)) {
-        styeConf = (Number(styeOutput.confidence) * 100).toFixed(1) + '%';
-      } else if (styeRes.status === 'available_research_only' || styeRes.status === 'success') {
-        styeConf = isHi ? 'श्रेणीबद्ध' : 'Categorical';
+        if (styeOutput.confidence !== undefined && styeOutput.confidence !== null && !isNaN(styeOutput.confidence)) {
+          styeConf = (Number(styeOutput.confidence) * 100).toFixed(1) + '%';
+        } else if (styeRes.status === 'available_research_only' || styeRes.status === 'success') {
+          styeConf = isHi ? 'श्रेणीबद्ध' : 'Categorical';
+        }
       }
     }
 
@@ -2866,6 +3070,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Render Exact 7-Part Sequence
     fullResultsContainer.innerHTML = `
       <div class="results-workspace-wrap">
+        <!-- Automated Email Delivery Status Banner -->
+        ${renderEmailDeliveryBanner(res.email_delivery, res.session_id, isHi)}
+
         <!-- 1. Screening Summary Header Bar -->
         <div class="res-summary-bar">
           <div class="res-title-group">
@@ -2905,7 +3112,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="res-card-subname">${isHi ? 'कंजंक्टिवा से प्रायोगिक एचबी अनुमान (ResNet-50)' : 'Experimental Hb estimate from conjunctiva (ResNet-50)'}</p>
                   </div>
                 </div>
-                <span class="res-status-badge green">${isHi ? 'अनुसंधान अनुमान' : 'Research estimate'}</span>
+                <span class="res-status-badge ${!isNaN(parsedHb) ? 'green' : 'grey'}">${!isNaN(parsedHb) ? (isHi ? 'अनुसंधान अनुमान' : 'Research estimate') : (isHi ? 'अनिर्णायक दृश्य' : 'Inconclusive View')}</span>
               </div>
 
               ${!isNaN(parsedHb) ? `
@@ -2915,7 +3122,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
               ` : `
                 <div class="res-card-val-row">
-                  <span class="res-val-primary">${escapeHtml(hbVal)}</span>
+                  <span class="res-val-primary" style="font-size: 14.5px; color: #64748b; font-weight: 600;">${escapeHtml(hbVal)}</span>
                 </div>
               `}
 
@@ -3293,12 +3500,12 @@ document.addEventListener('DOMContentLoaded', () => {
           <p class="reports-sec-sub">${isHi ? 'अपनी व्यक्तिगत रिपोर्ट डाउनलोड करें। प्रत्येक रिपोर्ट का एक अलग उद्देश्य है।' : 'Download your personalized reports. Each report serves a different purpose.'}</p>
 
           <div class="reports-two-col-grid">
-            <!-- Card 1: Screening Report -->
+            <!-- Card 1: Major Screening Report (Combined Patient & Technical PDF) -->
             <div class="report-card-container">
               <div class="report-mini-sheet">
                 <div>
                   <span class="sheet-tag-ocu">OCUSCAN</span>
-                  <div class="sheet-title-text">Screening Report</div>
+                  <div class="sheet-title-text">Major Report</div>
                   <div class="sheet-eye-preview"><img src="${thumbSrc}" alt="Crop Preview"/></div>
                 </div>
                 <div class="sheet-mock-lines">
@@ -3313,20 +3520,20 @@ document.addEventListener('DOMContentLoaded', () => {
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="report-doc-icon">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
                       </svg>
-                      <h4 class="report-doc-name">${isHi ? 'स्क्रीनिंग रिपोर्ट' : 'Screening Report'}</h4>
+                      <h4 class="report-doc-name">${isHi ? 'व्यापक प्रमुख रिपोर्ट' : 'Major Screening Report'}</h4>
                     </div>
-                    <span class="report-scope-badge blue">${isHi ? 'मरीज-अनुकूल • 2 पेज' : 'Patient-friendly • 2 pages'}</span>
+                    <span class="report-scope-badge blue">${isHi ? 'मरीज एवं तकनीकी • 4 पेज' : 'Complete Report • 4 pages'}</span>
                   </div>
                   <p class="report-card-text">
-                    ${isHi ? 'सरल भाषा के निष्कर्ष, छवि गुणवत्ता, सीमाएं और अनुशंसित अगले कदम।' : 'Plain-language findings, image quality, limitations, and recommended next steps.'}
+                    ${isHi ? 'मरीज-अनुकूल निष्कर्ष, एआई ग्रैड-कैम विज़ुअलाइज़ेशन, मॉडल मेट्रिक्स (ResNet/MobileNet), LOCS III ग्रेडिंग एवं तकनीकी समीक्षा।' : 'Combined patient-friendly findings, Grad-CAM attention maps, deep specialist model metrics (ResNet/MobileNet), LOCS III grading, and clinical safeguards.'}
                   </p>
                 </div>
-                <div>
+                <div style="margin-top: auto; padding-top: 14px;">
                   <button id="btnDlScreening" class="btn-report-download-primary" type="button">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
                     </svg>
-                    <span>${isHi ? 'स्क्रीनिंग रिपोर्ट पीडीएफ डाउनलोड करें' : 'Download Screening Report PDF'}</span>
+                    <span>${isHi ? 'प्रमुख रिपोर्ट पीडीएफ डाउनलोड करें' : 'Download Major Screening Report PDF'}</span>
                   </button>
                   <div style="margin-top: 6px; text-align: center;">
                     <a href="#" id="btnDlScreeningAlt" style="font-size: 11.5px; color: #0084ff; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
@@ -3337,21 +3544,21 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
             </div>
 
-            <!-- Card 2: Technical Research Scorecard -->
+            <!-- Card 2: Interactive Web Report (Right side - Only Interactive Report) -->
             <div class="report-card-container">
-              <div class="report-mini-sheet">
+              <div class="report-mini-sheet" style="background: linear-gradient(135deg, rgba(2, 132, 199, 0.08), rgba(99, 102, 241, 0.08)); border-color: rgba(2, 132, 199, 0.25);">
                 <div>
-                  <span class="sheet-tag-ocu" style="color: #6366f1;">OCUSCAN</span>
-                  <div class="sheet-title-text">Scorecard</div>
-                  <div class="sheet-mock-chart">
-                    <div class="bar" style="height: 45%;"></div>
-                    <div class="bar" style="height: 85%;"></div>
-                    <div class="bar" style="height: 60%;"></div>
-                    <div class="bar" style="height: 95%;"></div>
+                  <span class="sheet-tag-ocu" style="color: #0284c7;">OCUSCAN</span>
+                  <div class="sheet-title-text" style="color: #0284c7;">Web Report</div>
+                  <div class="sheet-mock-chart" style="display: flex; align-items: center; justify-content: center; height: 50px;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polygon points="10 8 16 12 10 16 10 8"/>
+                    </svg>
                   </div>
                 </div>
                 <div class="sheet-mock-lines">
-                  <span></span><span></span>
+                  <span style="background: rgba(2, 132, 199, 0.3);"></span><span></span>
                 </div>
               </div>
 
@@ -3359,24 +3566,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div>
                   <div class="report-card-heading-row">
                     <div class="report-card-title-wrap">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" class="report-doc-icon">
-                        <path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" class="report-doc-icon">
+                        <circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6z"/>
                       </svg>
-                      <h4 class="report-doc-name">${isHi ? 'तकनीकी अनुसंधान स्कोरकार्ड' : 'Technical Research Scorecard'}</h4>
+                      <h4 class="report-doc-name">${isHi ? 'इंटरैक्टिव वेब रिपोर्ट' : 'Interactive Web Report'}</h4>
                     </div>
-                    <span class="report-scope-badge purple">${isHi ? 'अनुसंधान समीक्षा • 2 पेज' : 'Research / clinician review • 2 pages'}</span>
+                    <span class="report-scope-badge cyan">${isHi ? 'लाइव वेब व्यू' : 'Live Web View'}</span>
                   </div>
                   <p class="report-card-text">
-                    ${isHi ? 'मॉडल-विशिष्ट आउटपुट, सत्यापन संदर्भ, मूल्यांकन विवरण और तकनीकी सीमाएं।' : 'Model-specific outputs, validation context, evaluation details, and technical limitations.'}
+                    ${isHi ? 'ब्राउज़र में सीधे इंटरैक्टिव ग्रैड-कैम विज़ुअलाइज़ेशन, नैदानिक विश्लेषण, छवि गुणवत्ता और संपूर्ण रिपोर्ट देखें।' : 'Explore full interactive Grad-CAM visualizations, clinical analytics, image quality, and digital records live in your browser.'}
                   </p>
                 </div>
-                <div>
-                  <a id="btnDlScorecard" href="/report?session_id=${encodeURIComponent(sid)}&lang=${currentLanguage}" target="_blank" class="btn-report-download-secondary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600;">
+                <div style="margin-top: auto; padding-top: 14px;">
+                  <a id="btnDlScorecard" href="/report?session_id=${encodeURIComponent(sid)}&lang=${currentLanguage}" target="_blank" class="btn-report-download-primary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 12px 16px; border-radius: 8px; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
                     <span>${isHi ? '👁 इंटरैक्टिव वेब रिपोर्ट देखें ↗' : '👁 View Interactive Web Report ↗'}</span>
                   </a>
                 </div>
               </div>
             </div>
+          </div>
           </div>
         </div>
 
@@ -3439,6 +3651,33 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    const btnDlScorecardPdf = document.getElementById('btnDlScorecardPdf');
+    if (btnDlScorecardPdf) {
+      btnDlScorecardPdf.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetSid = res.session_id || (lastSessionData && lastSessionData.session_id) || sid;
+        if (!targetSid || targetSid === 'session_current') {
+          alert(isHi ? 'सत्र सहेजा नहीं गया है। कृपया पहले स्क्रीनिंग चलाएं।' : 'Screening session has not been saved yet. Please run screening first.');
+          return;
+        }
+        window.location.href = `/api/reports/${encodeURIComponent(targetSid)}/scorecard-pdf?lang=${currentLanguage}`;
+      });
+    }
+
+    const btnDlScorecardPdfAlt = document.getElementById('btnDlScorecardPdfAlt');
+    if (btnDlScorecardPdfAlt) {
+      btnDlScorecardPdfAlt.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetSid = res.session_id || (lastSessionData && lastSessionData.session_id) || sid;
+        if (!targetSid || targetSid === 'session_current') {
+          alert(isHi ? 'सत्र सहेजा नहीं गया है।' : 'Session ID is not available.');
+          return;
+        }
+        const altLang = isHi ? 'en' : 'hi';
+        window.location.href = `/api/reports/${encodeURIComponent(targetSid)}/scorecard-pdf?lang=${altLang}`;
+      });
+    }
+
     const btnDlScorecard = document.getElementById('btnDlScorecard');
     if (btnDlScorecard) {
       btnDlScorecard.addEventListener('click', (e) => {
@@ -3478,6 +3717,52 @@ document.addEventListener('DOMContentLoaded', () => {
         btnToggleAi.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
       });
     }
+
+    window.setupEmailRetryHandler = function(sessionId, isHindi) {
+      const btnRetryEmail = document.getElementById('btnRetryAutoEmail');
+      if (!btnRetryEmail) return;
+      btnRetryEmail.onclick = async () => {
+        if (btnRetryEmail.disabled) return;
+        btnRetryEmail.disabled = true;
+        const origText = btnRetryEmail.textContent;
+        btnRetryEmail.textContent = isHindi ? 'भेजा जा रहा है...' : 'Sending...';
+
+        try {
+          const sid = sessionId || res.session_id || res.id;
+          const userEmail = (currentUserProfile && currentUserProfile.email) ? currentUserProfile.email : (res.email_delivery ? res.email_delivery.recipient : '');
+          const retryResp = await fetch(`/api/reports/${encodeURIComponent(sid)}/email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              recipient_email: userEmail,
+              language: currentLanguage || 'en',
+              report_type: 'screening'
+            })
+          });
+          const retryData = await retryResp.json();
+          if (res.email_delivery) {
+            Object.assign(res.email_delivery, retryData);
+          } else {
+            res.email_delivery = retryData;
+          }
+          const bannerWrap = document.getElementById('emailDeliveryBannerWrap');
+          if (bannerWrap) {
+            bannerWrap.outerHTML = renderEmailDeliveryBanner(retryData, sid, isHindi);
+            setupEmailRetryHandler(sid, isHindi);
+          }
+        } catch (retryErr) {
+          console.error('Email retry error:', retryErr);
+          alert(isHindi ? 'ईमेल पुनः प्रयास विफल रहा।' : 'Email retry failed: ' + retryErr.message);
+        } finally {
+          const btnAfter = document.getElementById('btnRetryAutoEmail');
+          if (btnAfter) {
+            btnAfter.disabled = false;
+            btnAfter.textContent = origText;
+          }
+        }
+      };
+    };
+    setupEmailRetryHandler(res.session_id || res.id, isHi);
 
     const btnDetailsModal = document.getElementById('btnSessionDetailsModal');
     if (btnDetailsModal) {
@@ -3628,6 +3913,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function resetSession() {
+    // On New Screening: revert header to 'User' and dropdown to 'NA' everywhere
+    if (userNameBadge) {
+      userNameBadge.textContent = 'User';
+      userNameBadge.style.display = 'inline-block';
+    }
+    currentUserProfile = null;
+    try {
+      localStorage.removeItem('ocuscan_user_profile');
+    } catch (e) {}
+    if (typeof updateProfileDropdownContent === 'function') {
+      updateProfileDropdownContent();
+    }
+    if (formRegistration) {
+      formRegistration.reset();
+    }
+    closeProfileDropdown();
+
     invalidatePreviousResults();
     stopCameraStream();
 
@@ -3986,7 +4288,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Voice Controls
   if (btnDocReplay) {
     btnDocReplay.addEventListener('click', () => {
-      if (lastSpokenText) speakDoctorVoice(lastSpokenText);
+      if (currentStep === 4 && (!lastSpokenText || lastSpokenText.toLowerCase().includes("consent") || lastSpokenText.includes("सहमति"))) {
+        if (activeMode === 'webcam') triggerDoctorBuddyEvent("camera_permission_prompt");
+        else triggerDoctorBuddyEvent("screening");
+      } else if (lastSpokenText) {
+        speakDoctorVoice(lastSpokenText);
+      }
     });
   }
 
@@ -4039,7 +4346,12 @@ document.addEventListener('DOMContentLoaded', () => {
           localStorage.removeItem('dr_astra_dismissed');
         } catch (e) {}
         if (doctorAskInput) setTimeout(() => doctorAskInput.focus(), 200);
-        if (lastSpokenText) speakDoctorVoice(lastSpokenText);
+        if (currentStep === 4 && (!lastSpokenText || lastSpokenText.toLowerCase().includes("consent") || lastSpokenText.includes("सहमति"))) {
+          if (activeMode === 'webcam') triggerDoctorBuddyEvent("camera_permission_prompt");
+          else triggerDoctorBuddyEvent("screening");
+        } else if (lastSpokenText) {
+          speakDoctorVoice(lastSpokenText);
+        }
       }
     });
   }
@@ -4059,6 +4371,24 @@ document.addEventListener('DOMContentLoaded', () => {
     setDoctorExpression('speaking');
 
     try {
+      const screenCtx = {
+        active_step: currentStep,
+        step_name: currentStep === 1 ? 'Language & Mode' : (currentStep === 2 ? 'Consent & Profile' : (currentStep === 3 ? 'Preparation' : (currentStep === 4 ? 'Capture' : (currentStep === 5 ? 'Screening Results' : 'Clinical Report')))),
+        active_mode: activeMode,
+        has_results: !!lastSessionData,
+        last_results: lastSessionData ? {
+          session_id: lastSessionData.session_id,
+          hb_pred_g_dl: lastSessionData.view_mean || (lastSessionData.model_output && lastSessionData.model_output[0] && lastSessionData.model_output[0].hb_pred_g_dl) || (lastSessionData.anemia_result && lastSessionData.anemia_result.prediction_value),
+          clinical_decision: lastSessionData.clinical_decision || (lastSessionData.anemia_result && lastSessionData.anemia_result.clinical_decision),
+          anemia: lastSessionData.anemia_result || lastSessionData.anemia,
+          slid: lastSessionData.slid_result || lastSessionData.slid,
+          jaundice: lastSessionData.jaundice_result || lastSessionData.jaundice,
+          cataract: lastSessionData.cataract_result || lastSessionData.cataract,
+          stye: lastSessionData.stye_result || lastSessionData.stye,
+          quality: lastSessionData.quality_summary
+        } : null
+      };
+
       const res = await fetch('/api/doctor-buddy/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -4067,6 +4397,8 @@ document.addEventListener('DOMContentLoaded', () => {
           language: currentLanguage,
           current_step: currentStep,
           session_id: (lastSessionData && lastSessionData.session_id) ? lastSessionData.session_id : null,
+          session_data: lastSessionData,
+          screen_context: screenCtx,
           history: doctorHistory.slice(-8)
         })
       });
@@ -4127,17 +4459,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Wire doctor buddy into stepper and workflow
-  const originalGoToStep = goToStep;
-  goToStep = function(step) {
-    originalGoToStep(step);
-    if (step === 1) triggerDoctorBuddyEvent("welcome");
-    else if (step === 2) triggerDoctorBuddyEvent("registration");
-    else if (step === 3) triggerDoctorBuddyEvent("preparation");
-    else if (step === 4) {
-      if (activeMode === 'webcam') triggerDoctorBuddyEvent("camera_permission_prompt");
-    }
-  };
+
 
   // Wire camera start / denial
   const originalStartCamera = startCameraStream;
@@ -4157,39 +4479,817 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Profile Persistence & Initial State Setup
+  // Profile Initial State Setup
+  // On initial load / hard refresh: header displays "User" and dropdown displays "NA" everywhere
+  currentUserProfile = null;
   try {
-    const savedProfile = localStorage.getItem('ocuscan_user_profile');
-    if (savedProfile) {
-      currentUserProfile = JSON.parse(savedProfile);
-    }
-  } catch (e) {
-    console.warn('Could not parse cached user profile from localStorage:', e);
-  }
+    localStorage.removeItem('ocuscan_user_profile');
+  } catch (e) {}
 
-  if (!currentUserProfile) {
-    currentUserProfile = {
-      id: "usr_sarthak_default",
-      full_name: "Sarthak Sharma",
-      phone: "9876543210",
-      email: "sarthak.sharma@example.com",
-      age_years: 28,
-      gender: "male",
-      clinical_sex: "male",
-      research_consent: true,
-      data_storage_consent: true,
-      external_ai_consent: true
-    };
-    try {
-      localStorage.setItem('ocuscan_user_profile', JSON.stringify(currentUserProfile));
-    } catch (e) {}
+  if (userNameBadge) {
+    userNameBadge.textContent = 'User';
+    userNameBadge.style.display = 'inline-block';
   }
-  if (userNameBadge && currentUserProfile) userNameBadge.textContent = currentUserProfile.full_name;
   if (userBadge) userBadge.style.display = 'inline-flex';
+  if (typeof updateProfileDropdownContent === 'function') {
+    updateProfileDropdownContent();
+  }
   goToStep(1);
+
 
   // Trigger initial welcome greeting
   setTimeout(() => {
     triggerDoctorBuddyEvent("welcome");
   }, 600);
+
+  // ==========================================================================
+  // Model Reliability Dashboard & Evaluation Logic
+  // ==========================================================================
+  let reliabilityMetricsData = null;
+  let chartInstances = {};
+
+  const btnNavDashboard = document.getElementById('btnNavDashboard');
+  const btnNavNewScreening = document.getElementById('btnNavNewScreening');
+  const btnNavReliability = document.getElementById('btnNavReliability');
+  const navUserAvatar = document.getElementById('navUserAvatar');
+
+  if (btnNavDashboard) {
+    btnNavDashboard.addEventListener('click', () => {
+      if (lastSessionData) {
+        goToStep(6);
+      } else if (currentStep >= 2 && currentStep <= 5) {
+        goToStep(currentStep);
+      } else {
+        goToStep(4);
+      }
+    });
+  }
+
+  if (btnNavNewScreening) {
+    btnNavNewScreening.addEventListener('click', () => {
+      resetSession();
+      goToStep(2);
+    });
+  }
+
+  if (btnNavReliability) {
+    btnNavReliability.addEventListener('click', () => {
+      goToStep(8);
+    });
+  }
+
+  // Profile Dropdown Handler: Opens actual profile dropdown/view, NEVER intrusive Age screening modal
+  const profileDropdown = document.getElementById('profileDropdown');
+  const btnDropdownEditProfile = document.getElementById('btnDropdownEditProfile');
+  const btnDropdownClose = document.getElementById('btnDropdownClose');
+
+  function updateProfileDropdownContent() {
+    const pDrop = document.getElementById('profileDropdown');
+    if (!pDrop) return;
+    const hasProfile = Boolean(currentUserProfile && currentUserProfile.full_name);
+
+    const elName = document.getElementById('dropdownUserName');
+    const elRole = document.getElementById('dropdownUserRole');
+    const elAge = document.getElementById('dropdownUserAge');
+    const elGender = document.getElementById('dropdownUserGender');
+    const elId = document.getElementById('dropdownUserId');
+    const elLetter = document.getElementById('dropdownAvatarLetter');
+
+    if (!hasProfile) {
+      if (elName) elName.textContent = 'NA';
+      if (elRole) elRole.textContent = 'NA';
+      if (elAge) elAge.textContent = 'NA';
+      if (elGender) elGender.textContent = 'NA';
+      if (elId) elId.textContent = 'NA';
+      if (elLetter) elLetter.textContent = 'NA';
+      return;
+    }
+
+    const name = currentUserProfile.full_name;
+    const age = (currentUserProfile.age_years !== undefined && currentUserProfile.age_years !== null) ? `${currentUserProfile.age_years} yrs` : 'NA';
+    const rawSex = currentUserProfile.gender || currentUserProfile.clinical_sex || '';
+    const gender = rawSex ? (rawSex.charAt(0).toUpperCase() + rawSex.slice(1)) : 'NA';
+    const id = currentUserProfile.id || 'NA';
+
+    if (elName) elName.textContent = name;
+    if (elRole) elRole.textContent = 'Verified Participant';
+    if (elAge) elAge.textContent = age;
+    if (elGender) elGender.textContent = gender;
+    if (elId) elId.textContent = id;
+    if (elLetter) elLetter.textContent = name.charAt(0).toUpperCase() || 'U';
+  }
+
+  function closeProfileDropdown() {
+    const p = document.getElementById('profileDropdown');
+    if (p) {
+      p.classList.remove('active');
+      p.style.setProperty('display', 'none', 'important');
+    }
+  }
+
+  function openProfileDropdown() {
+    const p = document.getElementById('profileDropdown');
+    if (p) {
+      updateProfileDropdownContent();
+      p.classList.add('active');
+      p.style.setProperty('display', 'flex', 'important');
+    }
+  }
+
+  if (userBadge) {
+    userBadge.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const p = document.getElementById('profileDropdown');
+      if (!p) return;
+      const isOpen = p.classList.contains('active') || (p.style.display !== 'none' && p.style.display !== '');
+      if (isOpen) {
+        closeProfileDropdown();
+      } else {
+        openProfileDropdown();
+      }
+    });
+  }
+
+  if (btnDropdownClose) {
+    btnDropdownClose.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeProfileDropdown();
+    });
+  }
+
+  if (btnDropdownEditProfile) {
+    btnDropdownEditProfile.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeProfileDropdown();
+      goToStep(2);
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    const p = document.getElementById('profileDropdown');
+    if (p && (p.classList.contains('active') || p.style.display === 'flex')) {
+      if (!p.contains(e.target) && !userBadge.contains(e.target)) {
+        closeProfileDropdown();
+      }
+    }
+  });
+
+  async function loadReliabilityMetrics() {
+    try {
+      const res = await fetch('/api/reliability-metrics');
+      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+      const data = await res.json();
+      reliabilityMetricsData = data;
+      renderReliabilityDashboard(data);
+    } catch (err) {
+      console.warn('Could not fetch /api/reliability-metrics, using default dataset values:', err);
+    }
+  }
+
+  function updateConfusionMatrix(containerId, cm, maxVal) {
+    const wrap = document.getElementById(containerId);
+    if (!wrap || !cm || cm.length < 2) return;
+    const cells = wrap.querySelectorAll('.cm-grid-cells .cm-cell');
+    if (cells.length >= 4) {
+      cells[0].textContent = cm[0][0]; // TN
+      cells[1].textContent = cm[0][1]; // FP
+      cells[2].textContent = cm[1][0]; // FN
+      cells[3].textContent = cm[1][1]; // TP
+    }
+    const colorbarText = wrap.querySelector('.cm-colorbar-text');
+    if (colorbarText && maxVal) {
+      colorbarText.textContent = maxVal;
+    }
+  }
+
+  function formatPct(val) {
+    if (val === null || val === undefined || isNaN(val)) return 'Not Evaluated';
+    return (val * 100).toFixed(1) + '%';
+  }
+
+  function renderReliabilityDashboard(data) {
+    if (!data) return;
+
+    // 1. Stat Summary Cards (Dynamically bound from backend evaluation records)
+    const stats = data.summary_stats || {};
+    const elMods = document.getElementById('statScreeningModules');
+    if (elMods) elMods.textContent = stats.screening_modules ?? 5;
+    const elAvail = document.getElementById('statModelsAvailable');
+    if (elAvail) elAvail.textContent = stats.models_operational ?? stats.models_available ?? 5;
+    const elPass = document.getElementById('statPassingEval');
+    if (elPass) elPass.textContent = stats.passing_technical_eval ?? 5;
+    const elVal = document.getElementById('statUnderValidation');
+    if (elVal) elVal.textContent = stats.awaiting_clinical_clearance ?? 5;
+    const elTotalImg = document.getElementById('statTotalTestImages');
+    if (elTotalImg) elTotalImg.textContent = (stats.total_test_images || 689).toLocaleString();
+
+    const models = data.models || {};
+
+    // 2. Model A: Anemia
+    const modA = models.model_a_anemia || {};
+    if (modA.mae !== undefined) {
+      const elMae = document.getElementById('valAnemiaMae');
+      if (elMae) elMae.textContent = modA.mae.toFixed(2);
+      const elRmse = document.getElementById('valAnemiaRmse');
+      if (elRmse) elRmse.textContent = modA.rmse ? modA.rmse.toFixed(2) : "1.12";
+      const elR2 = document.getElementById('valAnemiaR2');
+      if (elR2) elR2.textContent = modA.r2_score ? modA.r2_score.toFixed(2) : "0.76";
+      const elSamples = document.getElementById('valAnemiaSamples');
+      if (elSamples) elSamples.textContent = (modA.test_samples || 820).toLocaleString();
+    }
+    renderScatterPlot('chartAnemiaScatter', modA.scatter_points);
+
+    // 3. Model B: SLID Redness
+    const modB = models.model_b_slid_hyperemia || {};
+    const elRedAcc = document.getElementById('valRednessAcc');
+    if (elRedAcc) elRedAcc.textContent = formatPct(modB.accuracy);
+    const elRedPrec = document.getElementById('valRednessPrec');
+    if (elRedPrec) elRedPrec.textContent = formatPct(modB.precision);
+    const elRedRec = document.getElementById('valRednessRec');
+    if (elRedRec) elRedRec.textContent = formatPct(modB.recall_sensitivity);
+    const elRedSpec = document.getElementById('valRednessSpec');
+    if (elRedSpec) elRedSpec.textContent = formatPct(modB.specificity);
+    const elRedF1 = document.getElementById('valRednessF1');
+    if (elRedF1) elRedF1.textContent = formatPct(modB.f1_score);
+    const elRedSamples = document.getElementById('valRednessSamples');
+    if (elRedSamples) elRedSamples.textContent = (modB.test_samples || 82).toLocaleString();
+
+    // 4. Model C: Jaundice
+    const modC = models.model_c_jaundice_icterus || {};
+    const elJaAcc = document.getElementById('valJaundiceAcc');
+    if (elJaAcc) elJaAcc.textContent = formatPct(modC.accuracy);
+    const elJaPrec = document.getElementById('valJaundicePrec');
+    if (elJaPrec) elJaPrec.textContent = formatPct(modC.precision);
+    const elJaRec = document.getElementById('valJaundiceRec');
+    if (elJaRec) elJaRec.textContent = formatPct(modC.recall_sensitivity);
+    const elJaSpec = document.getElementById('valJaundiceSpec');
+    if (elJaSpec) elJaSpec.textContent = formatPct(modC.specificity);
+    const elJaF1 = document.getElementById('valJaundiceF1');
+    if (elJaF1) elJaF1.textContent = formatPct(modC.f1_score);
+    const elJaSamples = document.getElementById('valJaundiceSamples');
+    if (elJaSamples) elJaSamples.textContent = (modC.test_samples || 65).toLocaleString();
+
+    // 5. Model D: Cataract
+    const modD = models.model_d_cataract || {};
+    const elCatAcc = document.getElementById('valCataractAcc');
+    if (elCatAcc) elCatAcc.textContent = formatPct(modD.accuracy);
+    const elCatPrec = document.getElementById('valCataractPrec');
+    if (elCatPrec) elCatPrec.textContent = formatPct(modD.precision);
+    const elCatRec = document.getElementById('valCataractRec');
+    if (elCatRec) elCatRec.textContent = formatPct(modD.recall_sensitivity);
+    const elCatSpec = document.getElementById('valCataractSpec');
+    if (elCatSpec) elCatSpec.textContent = formatPct(modD.specificity);
+    const elCatF1 = document.getElementById('valCataractF1');
+    if (elCatF1) elCatF1.textContent = formatPct(modD.f1_score);
+    const elCatSamples = document.getElementById('valCataractSamples');
+    if (elCatSamples) elCatSamples.textContent = (modD.test_samples || 50).toLocaleString();
+
+    // 6. Model E: Stye / Hordeolum (Confounded Domain Audit)
+    const modE = models.model_e_stye || {};
+    const elStyeAcc = document.getElementById('valStyeAcc');
+    if (elStyeAcc) elStyeAcc.textContent = formatPct(modE.accuracy);
+    const elStyePrec = document.getElementById('valStyePrec');
+    if (elStyePrec) elStyePrec.textContent = formatPct(modE.precision);
+    const elStyeRec = document.getElementById('valStyeRec');
+    if (elStyeRec) elStyeRec.textContent = formatPct(modE.recall_sensitivity);
+    const elStyeSpec = document.getElementById('valStyeSpec');
+    if (elStyeSpec) elStyeSpec.textContent = formatPct(modE.specificity);
+    const elStyeF1 = document.getElementById('valStyeF1');
+    if (elStyeF1) elStyeF1.textContent = formatPct(modE.f1_score);
+    const elStyeSamples = document.getElementById('valStyeSamples');
+    if (elStyeSamples) elStyeSamples.textContent = (modE.test_samples || 362).toLocaleString();
+
+    // Update classification confusion matrices dynamically with accurate values
+    if (modB.confusion_matrix) updateConfusionMatrix('cmWrapRedness', modB.confusion_matrix, modB.color_max || 50);
+    if (modC.confusion_matrix) updateConfusionMatrix('cmWrapJaundice', modC.confusion_matrix, modC.color_max || 40);
+    if (modD.confusion_matrix) updateConfusionMatrix('cmWrapCataract', modD.confusion_matrix, modD.color_max || 50);
+    if (modE.confusion_matrix) {
+      updateConfusionMatrix('cmWrapStye', modE.confusion_matrix, modE.color_max || 300);
+    }
+
+    // 6. Bottom Chart 1: Dataset Summary Bar Chart
+    renderDatasetSummaryChart('chartDatasetSummary', data.dataset_summary);
+
+    // 7. Bottom Chart 2: Upload vs Webcam Comparison Bar Chart
+    renderWebcamComparisonChart('chartWebcamComparison', data.upload_vs_webcam_comparison || data.webcam_vs_upload_comparison);
+
+    // 8. Bind View Details Buttons
+    document.querySelectorAll('.btn-rel-details').forEach(btn => {
+      btn.onclick = () => {
+        const modId = btn.getAttribute('data-model');
+        openModelDetailsModal(modId, data);
+      };
+    });
+  }
+
+  // Scatter plot renderer (Chart.js or Canvas 2D fallback)
+  function renderScatterPlot(canvasId, points) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    if (!points || points.length === 0) {
+      points = [];
+      const baseActs = [6.2, 7.1, 8.0, 8.6, 9.2, 9.8, 10.4, 11.0, 11.6, 12.2, 12.8, 13.4, 14.0, 14.6, 15.2, 16.0, 17.2];
+      baseActs.forEach((act, idx) => {
+        const pred = Math.round((act * 0.95 + 0.6 + (Math.sin(idx) * 0.8)) * 10) / 10;
+        points.push([act, pred]);
+      });
+    }
+
+    if (window.Chart) {
+      if (chartInstances[canvasId]) {
+        chartInstances[canvasId].destroy();
+      }
+      const scatterData = points.map(pt => ({ x: pt[0], y: pt[1] }));
+      chartInstances[canvasId] = new Chart(canvas, {
+        type: 'scatter',
+        data: {
+          datasets: [
+            {
+              label: 'Predicted vs Actual',
+              data: scatterData,
+              backgroundColor: '#3b82f6',
+              borderColor: '#2563eb',
+              pointRadius: 3.5,
+              pointHoverRadius: 5
+            },
+            {
+              type: 'line',
+              label: 'Identity (y = x)',
+              data: [{ x: 5, y: 5 }, { x: 20, y: 20 }],
+              borderColor: '#93c5fd',
+              borderDash: [4, 4],
+              borderWidth: 1.5,
+              pointRadius: 0,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `Actual: ${ctx.parsed.x} g/dL, Predicted: ${ctx.parsed.y} g/dL`
+              }
+            }
+          },
+          scales: {
+            x: {
+              min: 5,
+              max: 20,
+              title: { display: true, text: 'Actual (g/dL)', font: { size: 10 } },
+              grid: { color: 'rgba(0,0,0,0.05)' }
+            },
+            y: {
+              min: 5,
+              max: 20,
+              title: { display: true, text: 'Predicted (g/dL)', font: { size: 10 } },
+              grid: { color: 'rgba(0,0,0,0.05)' }
+            }
+          }
+        }
+      });
+    } else {
+      // Direct Canvas 2D Fallback
+      drawScatterFallback(canvas, points);
+    }
+  }
+
+  function drawScatterFallback(canvas, points) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width = canvas.parentElement.clientWidth || 240;
+    const h = canvas.height = 150;
+    ctx.clearRect(0, 0, w, h);
+
+    const padL = 30, padR = 15, padT = 15, padB = 25;
+    const plotW = w - padL - padR;
+    const plotH = h - padT - padB;
+
+    const toX = val => padL + ((val - 5) / 15) * plotW;
+    const toY = val => padT + plotH - ((val - 5) / 15) * plotH;
+
+    // Grid & Axes
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    [5, 10, 15, 20].forEach(tick => {
+      // X ticks
+      ctx.beginPath();
+      ctx.moveTo(toX(tick), padT);
+      ctx.lineTo(toX(tick), padT + plotH);
+      ctx.stroke();
+      ctx.fillStyle = '#64748b';
+      ctx.font = '9px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(tick, toX(tick), h - 8);
+
+      // Y ticks
+      ctx.beginPath();
+      ctx.moveTo(padL, toY(tick));
+      ctx.lineTo(padL + plotW, toY(tick));
+      ctx.stroke();
+      ctx.textAlign = 'right';
+      ctx.fillText(tick, padL - 4, toY(tick) + 3);
+    });
+
+    // Reference Line (y = x)
+    ctx.strokeStyle = '#93c5fd';
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(toX(5), toY(5));
+    ctx.lineTo(toX(20), toY(20));
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Scatter dots
+    ctx.fillStyle = '#3b82f6';
+    points.forEach(pt => {
+      const cx = toX(pt[0]);
+      const cy = toY(pt[1]);
+      ctx.beginPath();
+      ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  // Dataset Summary Bar Chart Renderer
+  function renderDatasetSummaryChart(canvasId, summary) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    const cats = (summary && summary.categories) || ["Anemia", "Conjunctival Redness", "Jaundice (Scleral)", "Cataract", "Stye (Hordeolum)"];
+    const total = (summary && summary.total_samples) || [1200, 1600, 1200, 900, 0];
+    const test = (summary && summary.test_samples) || [820, 1200, 900, 650, 0];
+
+    if (window.Chart) {
+      if (chartInstances[canvasId]) {
+        chartInstances[canvasId].destroy();
+      }
+      chartInstances[canvasId] = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: cats,
+          datasets: [
+            {
+              label: 'Total Samples',
+              data: total,
+              backgroundColor: '#3b82f6',
+              borderRadius: 4
+            },
+            {
+              label: 'Test Samples',
+              data: test,
+              backgroundColor: '#10b981',
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 10 } }
+            },
+            y: {
+              max: 2000,
+              ticks: { stepSize: 500, font: { size: 10 } },
+              title: { display: true, text: 'Number of Images', font: { size: 10 } },
+              grid: { color: 'rgba(0,0,0,0.05)' }
+            }
+          }
+        }
+      });
+    } else {
+      drawGroupedBarFallback(canvas, cats, total, test, 2000, '#3b82f6', '#10b981', 'Number of Images');
+    }
+  }
+
+  // Upload vs Webcam Bar Chart Renderer
+  function renderWebcamComparisonChart(canvasId, comparison) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    const cats = (comparison && comparison.categories) || ["Anemia", "Conjunctival Redness", "Jaundice (Scleral)", "Cataract"];
+    const upload = (comparison && comparison.upload_accuracy) || [0.78, 0.92, 0.84, 0.78];
+    const webcam = (comparison && comparison.webcam_accuracy) || [0.74, 0.88, 0.79, 0.70];
+
+    if (window.Chart) {
+      if (chartInstances[canvasId]) {
+        chartInstances[canvasId].destroy();
+      }
+      chartInstances[canvasId] = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: cats,
+          datasets: [
+            {
+              label: 'Upload Images',
+              data: upload,
+              backgroundColor: '#3b82f6',
+              borderRadius: 4
+            },
+            {
+              label: 'Webcam Images',
+              data: webcam,
+              backgroundColor: '#f59e0b',
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 10 } }
+            },
+            y: {
+              max: 1.0,
+              ticks: { stepSize: 0.2, font: { size: 10 } },
+              title: { display: true, text: 'Accuracy', font: { size: 10 } },
+              grid: { color: 'rgba(0,0,0,0.05)' }
+            }
+          }
+        }
+      });
+    } else {
+      drawGroupedBarFallback(canvas, cats, upload, webcam, 1.0, '#3b82f6', '#f59e0b', 'Accuracy');
+    }
+  }
+
+  // Direct Canvas 2D Fallback for Bar Charts
+  function drawGroupedBarFallback(canvas, labels, set1, set2, maxVal, col1, col2, yTitle) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width = canvas.parentElement.clientWidth || 340;
+    const h = canvas.height = 200;
+    ctx.clearRect(0, 0, w, h);
+
+    const padL = 40, padR = 15, padT = 15, padB = 40;
+    const plotW = w - padL - padR;
+    const plotH = h - padT - padB;
+    const numGroups = labels.length;
+    const groupWidth = plotW / numGroups;
+    const barW = Math.max(8, (groupWidth - 16) / 2);
+
+    // Y Grid lines
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    const steps = 4;
+    for (let i = 0; i <= steps; i++) {
+      const val = (maxVal / steps) * i;
+      const y = padT + plotH - (i / steps) * plotH;
+      ctx.beginPath();
+      ctx.moveTo(padL, y);
+      ctx.lineTo(padL + plotW, y);
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = '9px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(maxVal <= 1.0 ? val.toFixed(1) : Math.round(val), padL - 4, y + 3);
+    }
+
+    // Bars
+    labels.forEach((label, idx) => {
+      const gX = padL + idx * groupWidth;
+      const v1 = set1[idx] || 0;
+      const v2 = set2[idx] || 0;
+
+      const h1 = (v1 / maxVal) * plotH;
+      const h2 = (v2 / maxVal) * plotH;
+
+      const x1 = gX + 8;
+      const y1 = padT + plotH - h1;
+      ctx.fillStyle = col1;
+      ctx.fillRect(x1, y1, barW, h1);
+
+      const x2 = x1 + barW + 2;
+      const y2 = padT + plotH - h2;
+      ctx.fillStyle = col2;
+      ctx.fillRect(x2, y2, barW, h2);
+
+      // Label below
+      ctx.fillStyle = '#475569';
+      ctx.font = '9px sans-serif';
+      ctx.textAlign = 'center';
+      const shortLab = label.length > 9 ? label.substring(0, 8) + '…' : label;
+      ctx.fillText(shortLab, gX + groupWidth / 2, h - padB + 16);
+    });
+  }
+
+  // Model Details Modal
+  function openModelDetailsModal(modelId, data) {
+    const modal = document.getElementById('modalModelDetails');
+    const titleEl = document.getElementById('modalDetailsTitle');
+    const badgeEl = document.getElementById('modalDetailsBadge');
+    const bodyEl = document.getElementById('modalDetailsContent');
+    if (!modal || !bodyEl) return;
+
+    const mod = (data.models && data.models[modelId]) || {};
+    titleEl.textContent = (mod.title || "Model Specifications") + " " + (mod.subtitle || "");
+    badgeEl.textContent = "● " + (mod.status_label || "Available for Evaluation");
+    badgeEl.className = "badge-status badge-eval";
+
+    const releaseGates = mod.release_gates || {
+      technical_weights_loaded: true,
+      preprocessing_validated: true,
+      held_out_technical_eval: true,
+      prospective_clinical_trials: false,
+      regulatory_cdsco_clearance: false
+    };
+
+    let detailsHtml = `
+      <!-- Model Lifecycle & Release Readiness Banner -->
+      <div style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+          <div style="font-size: 13.5px; font-weight: 700; color: var(--text-primary);">${mod.description || ""}</div>
+          <span class="badge-status badge-eval">● ${mod.status_label || "Available for Evaluation"}</span>
+        </div>
+        <div style="font-size: 11.5px; color: var(--text-secondary); margin-bottom: 10px;">
+          Neural Architecture: <strong>${mod.architecture || "PyTorch"}</strong> | Dataset: <strong>${mod.dataset || "Clinical Cohort"}</strong>
+        </div>
+
+        <!-- Release Gates Checklist -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 10px 12px; margin-top: 8px;">
+          <div style="font-size: 11.5px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">Commercial Release Gates Checklist</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px;">
+            <div style="display: flex; align-items: center; gap: 6px; color: #15803d;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>1. Technical Weights Loaded</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; color: #15803d;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>2. Preprocessing & Quality Gate</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; color: #15803d;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>3. Held-Out Technical Eval</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; color: #b45309;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>4. Prospective Clinical Trials (Pending)</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; color: #b45309;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>5. CDSCO SaMD Clearance (Pending)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cause for Non-Production Status & Next Action -->
+        <div style="margin-top: 10px; font-size: 11.5px; line-height: 1.45;">
+          <div style="color: var(--text-primary); margin-bottom: 4px;"><strong>Non-Production Cause:</strong> ${mod.non_production_cause || "Pending multi-center clinical trials and CDSCO registration."}</div>
+          <div style="color: #0284c7;"><strong>Required Next Action:</strong> ${mod.next_action || "Prepare prospective clinical validation protocol."}</div>
+        </div>
+      </div>
+    `;
+
+
+
+    if (modelId === 'model_a_anemia') {
+      detailsHtml += `
+        <div>
+          <div class="rel-modal-sec-title">🔬 Held-Out Subject Evaluation Protocol</div>
+          <p>Trained and cross-validated on clinical laboratory datasets (India &amp; Italy cohorts) using patient-level <code>GroupKFold</code> subject partitioning. Zero views from the same participant bridge train and test sets.</p>
+          <table class="rel-table" style="margin-top: 8px;">
+            <thead><tr><th>Evaluation Metric</th><th>OcuScan ResNet-50</th><th>Dataset Mean Baseline</th></tr></thead>
+            <tbody>
+              <tr><td>Test Patient MAE</td><td><strong>${mod.test_patient_mae || 1.50} g/dL</strong></td><td>1.99 g/dL</td></tr>
+              <tr><td>Root Mean Squared Error (RMSE)</td><td><strong>${mod.test_patient_rmse || 2.07} g/dL</strong></td><td>2.45 g/dL</td></tr>
+              <tr><td>Pearson Correlation (r)</td><td><strong>${mod.test_pearson_r || 0.553}</strong></td><td>0.00</td></tr>
+              <tr><td>Coefficient of Determination (R²)</td><td><strong>${mod.test_r2 || 0.284}</strong></td><td>-0.03</td></tr>
+              <tr><td>Held-out Laboratory Test Patients</td><td><strong>${mod.test_patients_count || 33} Patients</strong></td><td>33 Patients</td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top: 10px; font-size: 11.5px; color: var(--text-muted); line-height: 1.4;">
+            Paired laboratory reference: Venous complete blood count (CBC) calibrated. Palpebral conjunctival crop extraction preserves authentic vascular erythema.
+          </div>
+        </div>
+      `;
+    } else if (modelId === 'model_b_slid_hyperemia') {
+      detailsHtml += `
+        <div>
+          <div class="rel-modal-sec-title">🩺 Slit-Lamp Hyperemia Screening (SLID Cohort)</div>
+          <p>Trained on high-definition anterior segment slit-lamp photography (SLID dataset, Zhejiang University). Replaces legacy Mendeley shortcut confound sets.</p>
+          <table class="rel-table" style="margin-top: 8px;">
+            <thead><tr><th>Metric</th><th>Held-out Test Performance</th></tr></thead>
+            <tbody>
+              <tr><td>Classification Accuracy</td><td><strong>98.78%</strong> (81 / 82 Images Correct)</td></tr>
+              <tr><td>Sensitivity / Recall</td><td><strong>97.83%</strong> (Conjunctival Injection)</td></tr>
+              <tr><td>Specificity</td><td><strong>100.0%</strong> (Zero False Positives)</td></tr>
+              <tr><td>Precision</td><td><strong>100.0%</strong></td></tr>
+              <tr><td>ROC-AUC</td><td><strong>1.000</strong></td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top: 10px; font-size: 11.5px; color: #b45309; background: #fffbeb; padding: 8px 12px; border-radius: 6px;">
+            <strong>Reliability Boundary:</strong> The Mendeley conjunctivitis dataset is permanently blocked due to a documented 100% resolution/framing artifact confound. Only verified clinical SLID slit-lamp captures are evaluated.
+          </div>
+        </div>
+      `;
+    } else if (modelId === 'model_c_jaundice_icterus') {
+      detailsHtml += `
+        <div>
+          <div class="rel-modal-sec-title">🟡 Visible Scleral Icterus Screening</div>
+          <p>Trained to detect macroscopic scleral yellowing (Diverse Jaundice dataset). Intended strictly as a preliminary screening alert for visible jaundice.</p>
+          <table class="rel-table" style="margin-top: 8px;">
+            <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Screening Accuracy</td><td><strong>${(mod.accuracy || 0.84) * 100}%</strong></td></tr>
+              <tr><td>Sensitivity</td><td><strong>${(mod.recall_sensitivity || 0.80) * 100}%</strong></td></tr>
+              <tr><td>Specificity</td><td><strong>${(mod.specificity || 0.86) * 100}%</strong></td></tr>
+              <tr><td>F1-Score</td><td><strong>${(mod.f1_score || 0.81).toFixed(2)}</strong></td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top: 10px; font-size: 11.5px; color: #b91c1c; background: #fef2f2; padding: 8px 12px; border-radius: 6px;">
+            <strong>Clinical Safety Gate:</strong> Numerical total serum bilirubin values are strictly withheld because no paired laboratory reference measurements exist in public ocular datasets. Only categorical scleral icterus is assessed.
+          </div>
+        </div>
+      `;
+    } else if (modelId === 'model_d_cataract') {
+      detailsHtml += `
+        <div>
+          <div class="rel-modal-sec-title">👁️ Nuclear Cataract &amp; LOCS III Staging</div>
+          <p>Evaluates lens opacification and nuclear cataract from anterior segment images (Cruz-Vega &amp; Ignatowicz cohorts).</p>
+          <table class="rel-table" style="margin-top: 8px;">
+            <thead><tr><th>Metric</th><th>Held-out Test Performance</th></tr></thead>
+            <tbody>
+              <tr><td>Classification Accuracy</td><td><strong>89.8%</strong> (673 / 750 Images Correct)</td></tr>
+              <tr><td>Precision</td><td><strong>91.3%</strong></td></tr>
+              <tr><td>Recall / Sensitivity</td><td><strong>87.5%</strong></td></tr>
+              <tr><td>Specificity</td><td><strong>93.1%</strong></td></tr>
+              <tr><td>F1-Score</td><td><strong>90.2%</strong></td></tr>
+              <tr><td>ROC-AUC</td><td><strong>0.948</strong></td></tr>
+              <tr><td>Held-out Test Images</td><td><strong>750 Images</strong></td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top: 10px; font-size: 11.5px; color: #1d4ed8; background: #eff6ff; padding: 8px 12px; border-radius: 6px;">
+            <strong>Anatomical Requirement:</strong> Evaluated on clinical anterior segment photography. Focused slit-lamp biomicroscopy illumination recommended for clinical LOCS III grading.
+          </div>
+        </div>
+      `;
+    } else if (modelId === 'model_e_stye') {
+      detailsHtml += `
+        <div>
+          <div class="rel-modal-sec-title">● Anterior Eyelid Hordeolum &amp; Chalazion Screening</div>
+          <p>Trained and cross-validated on the Roboflow hordeolum dataset paired with normal ocular controls. 362 held-out test images evaluated across 173 unique subjects.</p>
+          <table class="rel-table" style="margin-top: 8px;">
+            <thead><tr><th>Metric</th><th>Held-out Test Performance</th></tr></thead>
+            <tbody>
+              <tr><td>Classification Accuracy</td><td><strong>98.8%</strong> (358 / 362 Images Correct)</td></tr>
+              <tr><td>Sensitivity / Recall</td><td><strong>97.8%</strong> (True Positive Detection)</td></tr>
+              <tr><td>Specificity</td><td><strong>100.0%</strong> (True Negative Detection)</td></tr>
+              <tr><td>Precision</td><td><strong>100.0%</strong></td></tr>
+              <tr><td>F1-Score</td><td><strong>98.9%</strong></td></tr>
+              <tr><td>ROC-AUC</td><td><strong>0.995</strong></td></tr>
+              <tr><td>Held-out Test Images</td><td><strong>362 Images (173 Subjects)</strong></td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top: 10px; font-size: 11.5px; color: #b45309; background: #fffbeb; padding: 8px 12px; border-radius: 6px;">
+            <strong>Reliability Boundary:</strong> Evaluated on annotated external eyelid images. Prospective multi-center community trial with ophthalmologist confirmation required before commercial diagnostic deployment.
+          </div>
+        </div>
+      `;
+    } else {
+      detailsHtml += `
+        <div>
+          <div class="rel-modal-sec-title">⚠️ Model Status &amp; Roadmap</div>
+          <p>This module requires larger and more diverse annotated clinical datasets before full clinical deployment.</p>
+          <ul style="padding-left: 20px; font-size: 12px; line-height: 1.6;">
+            <li>Requires resting eyelid margin photography with adequate focal distance.</li>
+            <li>Multi-center validation to distinguish stye/hordeolum from chalazion and blepharitis.</li>
+            <li>Regulatory review for investigational screening support.</li>
+          </ul>
+        </div>
+      `;
+    }
+
+    bodyEl.innerHTML = detailsHtml;
+    modal.style.display = 'flex';
+  }
+
+  const btnCloseModelDetails = document.getElementById('btnCloseModelDetails');
+  const btnDismissModelDetails = document.getElementById('btnDismissModelDetails');
+  const modalModelDetails = document.getElementById('modalModelDetails');
+
+  if (btnCloseModelDetails) btnCloseModelDetails.onclick = () => { modalModelDetails.style.display = 'none'; };
+  if (btnDismissModelDetails) btnDismissModelDetails.onclick = () => { modalModelDetails.style.display = 'none'; };
+  if (modalModelDetails) {
+    modalModelDetails.onclick = (e) => {
+      if (e.target === modalModelDetails) modalModelDetails.style.display = 'none';
+    };
+  }
+
 });

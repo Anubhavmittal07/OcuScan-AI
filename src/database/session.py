@@ -9,8 +9,108 @@ import os
 from typing import Optional, List, Dict, Any
 from contextlib import contextmanager
 
+import json
+from datetime import datetime, date
+from pathlib import Path
+import numpy as np
+import json
+from datetime import datetime, date
+from pathlib import Path
+import numpy as np
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
+
+def _json_default(obj: Any) -> Any:
+    if isinstance(obj, (np.bool_, getattr(np, "bool", bool))):
+        return bool(obj)
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    if isinstance(obj, (np.floating,)):
+        return float(obj)
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    if isinstance(obj, Path):
+        return str(obj)
+    if hasattr(obj, "to_dict") and callable(obj.to_dict):
+        return obj.to_dict()
+    if hasattr(obj, "__dict__"):
+        return obj.__dict__
+    return str(obj)
+
+def safe_json_dumps(obj: Any, **kwargs: Any) -> str:
+    return json.dumps(obj, default=_json_default, **kwargs)
+
+def sanitize_for_json(obj: Any) -> Any:
+    """Recursively converts numpy primitives, dates, and non-serializable objects into pure Python JSON-safe structures."""
+    if obj is None:
+        return None
+    if isinstance(obj, (bool, str, int, float)) and not isinstance(obj, (np.bool_, np.number)):
+        return obj
+    if isinstance(obj, (np.bool_, getattr(np, "bool", bool))):
+        return bool(obj)
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    if isinstance(obj, (np.floating,)):
+        return float(obj)
+    if isinstance(obj, np.ndarray):
+        return [sanitize_for_json(x) for x in obj.tolist()]
+    if isinstance(obj, dict):
+        return {str(k): sanitize_for_json(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple, set)):
+        return [sanitize_for_json(x) for x in obj]
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    if isinstance(obj, Path):
+        return str(obj)
+    return str(obj)
+
+def _json_default(obj: Any) -> Any:
+    if isinstance(obj, (np.bool_, getattr(np, "bool", bool))):
+        return bool(obj)
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    if isinstance(obj, (np.floating,)):
+        return float(obj)
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    if isinstance(obj, Path):
+        return str(obj)
+    if hasattr(obj, "to_dict") and callable(obj.to_dict):
+        return obj.to_dict()
+    if hasattr(obj, "__dict__"):
+        return obj.__dict__
+    return str(obj)
+
+def safe_json_dumps(obj: Any, **kwargs: Any) -> str:
+    return json.dumps(obj, default=_json_default, **kwargs)
+
+def sanitize_for_json(obj: Any) -> Any:
+    """Recursively converts numpy primitives, dates, and non-serializable objects into pure Python JSON-safe structures."""
+    if obj is None:
+        return None
+    if isinstance(obj, (bool, str, int, float)) and not isinstance(obj, (np.bool_, np.number)):
+        return obj
+    if isinstance(obj, (np.bool_, getattr(np, "bool", bool))):
+        return bool(obj)
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    if isinstance(obj, (np.floating,)):
+        return float(obj)
+    if isinstance(obj, np.ndarray):
+        return [sanitize_for_json(x) for x in obj.tolist()]
+    if isinstance(obj, dict):
+        return {str(k): sanitize_for_json(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple, set)):
+        return [sanitize_for_json(x) for x in obj]
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    if isinstance(obj, Path):
+        return str(obj)
+    return str(obj)
 
 from src.database.models import (
     Base,
@@ -35,6 +135,7 @@ connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite")
 engine = create_engine(
     DATABASE_URL,
     connect_args=connect_args,
+    json_serializer=safe_json_dumps,
     echo=False,
     future=True
 )
@@ -64,6 +165,13 @@ def init_db() -> None:
                     ("screening_sessions", "patient_clinical_sex", "VARCHAR(32) DEFAULT NULL"),
                     ("screening_sessions", "ai_explanation", "JSON DEFAULT NULL"),
                     ("model_results", "raw_prediction", "JSON DEFAULT NULL"),
+                    ("user_profiles", "email_delivery_consent", "BOOLEAN DEFAULT 1"),
+                    ("consent_records", "email_delivery_consent", "BOOLEAN DEFAULT 1"),
+                    ("report_metadata", "email_delivery_status", "VARCHAR(32) DEFAULT NULL"),
+                    ("report_metadata", "email_recipient", "VARCHAR(128) DEFAULT NULL"),
+                    ("report_metadata", "email_dispatched_at", "DATETIME DEFAULT NULL"),
+                    ("report_metadata", "email_error_message", "TEXT DEFAULT NULL"),
+                    ("report_metadata", "email_retry_count", "INTEGER DEFAULT 0"),
                 ]:
                     try:
                         columns_info = conn.exec_driver_sql(f"PRAGMA table_info({tbl})").fetchall()
@@ -218,6 +326,7 @@ def register_user(
     data_storage_consent: bool = True,
     demographic_consent: bool = False,
     external_ai_consent: bool = False,
+    email_delivery_consent: bool = True,
     consent_version: str = "2.0"
 ) -> UserProfile:
     """
@@ -275,6 +384,7 @@ def register_user(
         existing_user.pregnancy_trimester = pregnancy_trimester
         existing_user.demographic_consent = demographic_consent
         existing_user.external_ai_consent = external_ai_consent
+        existing_user.email_delivery_consent = email_delivery_consent
         user = existing_user
     else:
         user = UserProfile(
@@ -289,7 +399,8 @@ def register_user(
             is_pregnant=is_pregnant,
             pregnancy_trimester=pregnancy_trimester,
             demographic_consent=demographic_consent,
-            external_ai_consent=external_ai_consent
+            external_ai_consent=external_ai_consent,
+            email_delivery_consent=email_delivery_consent
         )
         db.add(user)
         db.flush()
@@ -303,6 +414,7 @@ def register_user(
         data_storage_consent=data_storage_consent,
         demographic_consent=demographic_consent,
         external_ai_consent=external_ai_consent,
+        email_delivery_consent=email_delivery_consent,
         consent_version=consent_version
     )
     db.add(consent)
@@ -380,11 +492,11 @@ def create_session(
         language=language,
         selected_module=selected_module,
         capture_source=capture_source,
-        patient_age_years=patient_age_years,
+        patient_age_years=int(patient_age_years) if patient_age_years is not None else None,
         patient_clinical_sex=patient_clinical_sex,
-        view_types=view_types or [],
-        quality_summary=quality_summary or {},
-        ai_explanation=ai_explanation
+        view_types=sanitize_for_json(view_types or []),
+        quality_summary=sanitize_for_json(quality_summary or {}),
+        ai_explanation=sanitize_for_json(ai_explanation) if ai_explanation else None
     )
     db.add(session)
     db.commit()
@@ -415,15 +527,15 @@ def save_model_result(
         session_id=session_id,
         module=module,
         operational_status=operational_status,
-        prediction_value=prediction_value,
+        prediction_value=float(prediction_value) if prediction_value is not None else None,
         unit=unit,
-        view_count=view_count,
-        view_mean=view_mean,
-        view_std=view_std,
-        reliability_warnings=reliability_warnings or [],
-        documented_limitations=documented_limitations or [],
+        view_count=int(view_count) if view_count is not None else None,
+        view_mean=float(view_mean) if view_mean is not None else None,
+        view_std=float(view_std) if view_std is not None else None,
+        reliability_warnings=sanitize_for_json(reliability_warnings or []),
+        documented_limitations=sanitize_for_json(documented_limitations or []),
         gate_reason=gate_reason,
-        raw_prediction=raw_prediction
+        raw_prediction=sanitize_for_json(raw_prediction)
     )
     db.add(res)
     db.commit()
@@ -469,18 +581,62 @@ def save_report_metadata(
     session_id: str,
     report_type: str = "ocular_health_screening",
     language: str = "en",
-    pdf_filename: Optional[str] = None
+    pdf_filename: Optional[str] = None,
+    email_delivery_status: Optional[str] = None,
+    email_recipient: Optional[str] = None,
+    email_dispatched_at: Optional[datetime] = None,
+    email_error_message: Optional[str] = None,
+    email_retry_count: int = 0
 ) -> ReportMetadata:
-    """Logs report generation for a session."""
+    """Logs report generation and email dispatch for a session."""
     meta = ReportMetadata(
         id=f"rep_{generate_uuid()[:12]}",
         session_id=session_id,
         report_type=report_type,
         language=language,
         pdf_filename=pdf_filename,
-        status="active"
+        status="active",
+        email_delivery_status=email_delivery_status,
+        email_recipient=email_recipient,
+        email_dispatched_at=email_dispatched_at,
+        email_error_message=email_error_message,
+        email_retry_count=email_retry_count
     )
     db.add(meta)
+    db.commit()
+    db.refresh(meta)
+    return meta
+
+
+def update_report_email_status(
+    db: Session,
+    session_id: str,
+    delivery_status: str,
+    recipient: Optional[str] = None,
+    dispatched_at: Optional[datetime] = None,
+    error_message: Optional[str] = None,
+    increment_retry: bool = False
+) -> Optional[ReportMetadata]:
+    """Updates or logs email delivery attempt and outcome for an active session."""
+    meta = db.query(ReportMetadata).filter(ReportMetadata.session_id == session_id).order_by(ReportMetadata.generated_at.desc()).first()
+    if not meta:
+        meta = ReportMetadata(
+            id=f"rep_{generate_uuid()[:12]}",
+            session_id=session_id,
+            report_type="ocular_health_screening",
+            language="en",
+            status="active"
+        )
+        db.add(meta)
+    meta.email_delivery_status = delivery_status
+    if recipient:
+        meta.email_recipient = recipient
+    if dispatched_at:
+        meta.email_dispatched_at = dispatched_at
+    if error_message is not None:
+        meta.email_error_message = error_message
+    if increment_retry:
+        meta.email_retry_count = (meta.email_retry_count or 0) + 1
     db.commit()
     db.refresh(meta)
     return meta

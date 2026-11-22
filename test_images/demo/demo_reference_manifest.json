@@ -1,0 +1,66 @@
+{
+  "description": "Demo-day reference manifest mapping verified SHA-256 image hashes to explicit clinical reference categories for live presentation. These reference annotations are for demo visual presentation and are strictly distinguished from genuine AI model predictions.",
+  "banner_text": "DEMO REFERENCE RESULT — PREDEFINED LABEL — NOT AN AI PREDICTION",
+  "references": {
+    "85a7e9246dd79ebb05e941269ea377bcf7dd1205b3707de5eea00914608218a9": {
+      "filename": "conjuctivities_redeye.jpg",
+      "sha256": "85a7e9246dd79ebb05e941269ea377bcf7dd1205b3707de5eea00914608218a9",
+      "dimensions": [254, 221],
+      "format": "JPEG",
+      "intended_category": "Conjunctival Injection / Suspected Conjunctivitis",
+      "target_module": "slid",
+      "reference_finding": "Conjunctival Injection / Red Eye (Suspected Conjunctivitis)",
+      "anatomical_suitability": "Bulbar conjunctiva clearly visible with prominent circumcorneal/ciliary injection and erythema.",
+      "ground_truth_status": "Visual presentation reference control. No microbiological culture or laboratory swab available.",
+      "presentation_notes": "Demonstrates conjunctival vascular dilatation typical of acute conjunctivitis. Slit-lamp gating and model inference run in parallel."
+    },
+    "617c9b83cebe02f33ae4082e42d7d5ac0d8a8c9e84bddb756fa3ab37ecb32cd2": {
+      "filename": "stye.jpg",
+      "sha256": "617c9b83cebe02f33ae4082e42d7d5ac0d8a8c9e84bddb756fa3ab37ecb32cd2",
+      "dimensions": [300, 300],
+      "format": "JPEG",
+      "intended_category": "External Hordeolum / Suspected Stye",
+      "target_module": "stye",
+      "reference_finding": "Suspected Stye / External Hordeolum (Eyelid Margin Lesion)",
+      "anatomical_suitability": "Upper/lower eyelid margin focused with focal erythematous nodular swelling at eyelash base.",
+      "ground_truth_status": "Visual presentation reference control. No clinical histopathology or bacterial culture available.",
+      "presentation_notes": "Demonstrates acute focal inflammatory nodule of the eyelid margin. Research-only checkpoint runs alongside."
+    },
+    "d1bc77b75616c58774577909357fe1b7675382a2e000b768c3ffce5fe23e6e63": {
+      "filename": "normal.jpeg",
+      "sha256": "d1bc77b75616c58774577909357fe1b7675382a2e000b768c3ffce5fe23e6e63",
+      "dimensions": [1024, 795],
+      "format": "JPEG",
+      "intended_category": "Normal Anterior Segment Control",
+      "target_module": "normal",
+      "reference_finding": "Normal Anterior Segment / No Acute Pathology",
+      "anatomical_suitability": "Full open eye showing clear cornea, white sclera, uninflamed eyelid margin, and no acute conjunctival injection.",
+      "ground_truth_status": "Visual presentation normal control. Verified clinically healthy appearance across anterior ocular segments.",
+      "presentation_notes": "Serves as negative control across all disease detectors (conjunctivitis, jaundice, stye, cataract, and non-anemic baseline)."
+    },
+    "16dd6993995ef8484d04f938d08d9e5febc82a8323eace0e834b542aed8db232": {
+      "filename": "anemia.jpg",
+      "sha256": "16dd6993995ef8484d04f938d08d9e5febc82a8323eace0e834b542aed8db232",
+      "dimensions": [768, 1024],
+      "format": "JPEG",
+      "intended_category": "Everted Palpebral Conjunctiva / Anemia Screening Reference",
+      "target_module": "anemia",
+      "reference_finding": "Everted Palpebral Conjunctiva (Anemia Assessment Reference)",
+      "anatomical_suitability": "Manually everted inferior palpebral conjunctiva clearly exposed for microvascular pallor inspection.",
+      "ground_truth_status": "Visual inspection reference control. No paired invasive CBC / spectrophotometric blood hemoglobin assay available. Numerical Hb must not be fabricated.",
+      "presentation_notes": "Standard clinical presentation view for conjunctival pallor screening. ResNet-50 regression model evaluates chromatic distribution."
+    },
+    "8794a1aa833a4c3337819d46213311096d98690ef327a8baa471e989686b045a": {
+      "filename": "Conjuctive.png",
+      "sha256": "8794a1aa833a4c3337819d46213311096d98690ef327a8baa471e989686b045a",
+      "dimensions": [852, 1024],
+      "format": "JPEG",
+      "intended_category": "Lower Eyelid Retraction / Conjunctival Examination Reference",
+      "target_module": "anemia",
+      "reference_finding": "Retracted Inferior Fornix / Palpebral Conjunctiva Reference",
+      "anatomical_suitability": "Finger retracting the lower eyelid margin, exposing inferior palpebral and forniceal conjunctiva.",
+      "ground_truth_status": "Visual inspection reference control. No laboratory blood assay available.",
+      "presentation_notes": "Demonstrates manual lid retraction exam technique for conjunctival assessment."
+    }
+  }
+}

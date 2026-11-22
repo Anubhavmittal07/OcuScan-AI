@@ -24,9 +24,33 @@ import uuid
 import json
 import base64
 import logging
+
+# ---------------------------------------------------------------------------
+# Devanagari / Hindi Font Registration
+# ---------------------------------------------------------------------------
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+HINDI_FONT_AVAILABLE = False
+try:
+    for fp in ["C:/Windows/Fonts/Nirmala.ttc", "/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf"]:
+        if os.path.exists(fp):
+            if fp.endswith(".ttc"):
+                pdfmetrics.registerFont(TTFont("NirmalaUI", fp, subfontIndex=0))
+                pdfmetrics.registerFont(TTFont("NirmalaUI-Bold", fp, subfontIndex=1))
+                pdfmetrics.registerFontFamily("NirmalaUI", normal="NirmalaUI", bold="NirmalaUI-Bold", italic="NirmalaUI", boldItalic="NirmalaUI-Bold")
+                HINDI_FONT_AVAILABLE = True
+                break
+except Exception as fe:
+    HINDI_FONT_AVAILABLE = False
+
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List
 
+
+
+# High-performance in-memory PDF cache for instant repeated downloads
+_PDF_CACHE: Dict[str, bytes] = {}
 logger = logging.getLogger("eyehealthai.pdf_report")
 
 from reportlab.lib.pagesizes import letter
@@ -77,8 +101,8 @@ def _b64_to_rl_image(
 
 REPORT_TEXTS = {
     "en": {
-        "screening_title": "OcuScan — Ocular Health Screening Report",
-        "screening_subtitle": "Patient-Friendly Screening Summary & Visual Biomarkers • Research Prototype",
+        "screening_title": "OcuScan — Comprehensive Major Screening Report",
+        "screening_subtitle": "Patient-Friendly Screening Summary, Specialist ML Architectures & Clinical Evidence",
         "scorecard_title": "OcuScan — Technical Research Scorecard",
         "scorecard_subtitle": "Clinician & Research Review • Specialist Architectures & Biomarkers",
         "page1_heading": "YOUR SCREENING SUMMARY & PATIENT ACTION PLAN",
@@ -210,9 +234,13 @@ REPORT_TEXTS = {
 }
 
 
-def _get_shared_styles():
-    """Builds clean, compact ReportLab styles for 2-page documents."""
+def _get_shared_styles(language: str = "en"):
+    """Builds clean, compact ReportLab styles with proper font selection."""
     styles = getSampleStyleSheet()
+
+    is_hi = language.lower().startswith("hi")
+    fn_normal = "NirmalaUI" if (is_hi and HINDI_FONT_AVAILABLE) else "Helvetica"
+    fn_bold = "NirmalaUI-Bold" if (is_hi and HINDI_FONT_AVAILABLE) else "Helvetica-Bold"
 
     primary_blue = colors.HexColor("#0f3a69")
     accent_blue = colors.HexColor("#0284c7")
@@ -224,7 +252,7 @@ def _get_shared_styles():
         "title": ParagraphStyle(
             "DocTitle",
             parent=styles["Normal"],
-            fontName="Helvetica-Bold",
+            fontName=fn_bold,
             fontSize=15,
             leading=18,
             textColor=primary_blue
@@ -232,7 +260,7 @@ def _get_shared_styles():
         "subtitle": ParagraphStyle(
             "DocSubtitle",
             parent=styles["Normal"],
-            fontName="Helvetica",
+            fontName=fn_normal,
             fontSize=8,
             leading=10,
             textColor=sub_text
@@ -240,7 +268,7 @@ def _get_shared_styles():
         "section_header": ParagraphStyle(
             "SectionHeader",
             parent=styles["Normal"],
-            fontName="Helvetica-Bold",
+            fontName=fn_bold,
             fontSize=9.5,
             leading=12,
             textColor=primary_blue,
@@ -249,7 +277,7 @@ def _get_shared_styles():
         "body": ParagraphStyle(
             "DocBody",
             parent=styles["Normal"],
-            fontName="Helvetica",
+            fontName=fn_normal,
             fontSize=7.8,
             leading=10,
             textColor=dark_text
@@ -257,7 +285,7 @@ def _get_shared_styles():
         "body_bold": ParagraphStyle(
             "DocBodyBold",
             parent=styles["Normal"],
-            fontName="Helvetica-Bold",
+            fontName=fn_bold,
             fontSize=7.8,
             leading=10,
             textColor=dark_text
@@ -265,7 +293,7 @@ def _get_shared_styles():
         "disclaimer": ParagraphStyle(
             "DisclaimerText",
             parent=styles["Normal"],
-            fontName="Helvetica-Bold",
+            fontName=fn_bold,
             fontSize=7,
             leading=9,
             textColor=colors.HexColor("#991b1b")
@@ -273,7 +301,7 @@ def _get_shared_styles():
         "caption": ParagraphStyle(
             "DocCaption",
             parent=styles["Normal"],
-            fontName="Helvetica",
+            fontName=fn_normal,
             fontSize=6.5,
             leading=8.5,
             alignment=1,
@@ -379,7 +407,7 @@ def _extract_model_outputs(session_data: Dict[str, Any]):
     elif val is not None and isinstance(val, (int, float)):
         hb_val = f"{float(val):.2f} g/dL"
         hb_status = "Available (Research Estimate)"
-        stage_name = clin_dec.get("stage_label_en") if clin_dec else None
+        stage_name = clin_dec.get("stage_label_en") if isinstance(clin_dec, dict) else (clin_dec if isinstance(clin_dec, str) else None)
         if not stage_name:
             stage_name = "Mild Anemia" if float(val) < 12.0 else "Non-Anemic Baseline"
         is_anemic = float(val) < 12.0
@@ -389,8 +417,13 @@ def _extract_model_outputs(session_data: Dict[str, Any]):
             if is_anemic else
             f"WHO Staging: {stage_name}. Estimated Hb is within standard reference interval."
         )
-        if clin_dec and not clin_dec.get("is_validated_population", True):
+        if isinstance(clin_dec, dict) and not clin_dec.get("is_validated_population", True):
             hb_meaning += " [Notice: Outside validated adult training population (18–88y)]."
+    elif anemia_status in ("unsupported_image", "inconclusive_view") or val is None:
+        hb_val = "Inconclusive (Palpebral View Required)"
+        hb_status = "Anatomical view gating active"
+        hb_obs = "Palpebral conjunctiva not exposed; anterior/eyelid view detected."
+        hb_meaning = "Hemoglobin regression is strictly evaluated on everted palpebral conjunctiva. Re-capture with lower eyelid gently everted."
     else:
         hb_val = "Not Evaluated"
         hb_status = "Image not assessable for Anemia regression"
@@ -505,6 +538,10 @@ def _extract_model_outputs(session_data: Dict[str, Any]):
         cataract_val = "Blocked (Camera Gate)"
         cataract_obs = "Requires slit-lamp biomicroscopy illumination cross-section"
         cataract_meaning = "Webcam cannot resolve lens nucleus; slit-lamp domain validation gate enforced."
+    elif cataract_status in ("unsupported_image", "inconclusive_modality", "inconclusive") or (c_item and str(c_item.get("predicted_class", "")).lower() in ("inconclusive_modality", "unsupported_image", "inconclusive")):
+        cataract_val = "Inconclusive (Modality)"
+        cataract_obs = "Requires slit-lamp optical slit sectioning"
+        cataract_meaning = "Lens clarity cannot be graded from external ambient photos; slit-lamp biomicroscopy required."
     elif cataract_status in ("unavailable", "unavailable_missing_data"):
         cataract_val = "Unavailable"
         cataract_obs = "Module not available for this session"
@@ -562,7 +599,11 @@ def _extract_model_outputs(session_data: Dict[str, Any]):
     elif "predicted_class" in stye_res or "class" in stye_res:
         s_item = stye_res
 
-    if stye_status in ("unavailable", "unavailable_missing_data"):
+    if stye_status in ("unsupported_image", "inconclusive_view", "inconclusive") or (s_item and str(s_item.get("predicted_class", "")).lower() in ("inconclusive_view", "unsupported_image", "inconclusive")):
+        stye_val = "Inconclusive (View)"
+        stye_obs = "Resting eyelid margin contour required"
+        stye_meaning = "Eyelid appears retracted or everted; resting margin required to assess hordeolum/stye."
+    elif stye_status in ("unavailable", "unavailable_missing_data"):
         stye_val = "Unavailable"
         stye_obs = "Module not available for this session"
         stye_meaning = "Clinical validation requirements not met."
@@ -639,7 +680,7 @@ def build_screening_report_pdf(
     chosen_lang = (lang or language or "en").lower()
     selected_lang = "hi" if chosen_lang.startswith("hi") else "en"
     t = REPORT_TEXTS[selected_lang]
-    st = _get_shared_styles()
+    st = _get_shared_styles(selected_lang)
     demo = _resolve_demographics(session_data, user_data)
     models = _extract_model_outputs(session_data)
 
@@ -685,7 +726,39 @@ def build_screening_report_pdf(
         ('RIGHTPADDING', (0, 0), (-1, -1), 5),
     ]))
     story.append(user_table)
-    story.append(Spacer(1, 6))
+    story.append(Spacer(1, 4))
+
+    # Demo Reference Mode Notification Banner (if active)
+    demo_ref = session_data.get("demo_reference") or {}
+    if demo_ref.get("is_demo_reference"):
+        demo_banner_bg = colors.HexColor("#fffbeb")
+        demo_banner_border = colors.HexColor("#f59e0b")
+        b_text = demo_ref.get("banner_text") or "DEMO REFERENCE RESULT — PREDEFINED LABEL — NOT AN AI PREDICTION"
+        ref_cat = demo_ref.get("intended_category") or "Reference Control"
+        ref_find = demo_ref.get("reference_finding") or "Presentation Control"
+        if selected_lang == "hi":
+            demo_box_text = (
+                f"<font color='#b45309'><b>{b_text}</b></font><br/>"
+                f"<b>संदर्भ श्रेणी:</b> {ref_cat} &bull; <b>निष्कर्ष:</b> {ref_find}<br/>"
+                f"<font color='#78350f'><i>सूचना: यह छवि एक पूर्व-निर्धारित प्रस्तुति नियंत्रण है। वास्तविक एआई मॉडल भविष्यवाणियां नीचे दी गई हैं।</i></font>"
+            )
+        else:
+            demo_box_text = (
+                f"<font color='#b45309'><b>{b_text}</b></font><br/>"
+                f"<b>Reference Category:</b> {ref_cat} &bull; <b>Finding:</b> {ref_find}<br/>"
+                f"<font color='#78350f'><i>Notice: Predefined presentation reference control. Genuine deep-learning inference and safety gates are displayed below.</i></font>"
+            )
+        demo_box = Table([[Paragraph(demo_box_text, st["body"])]], colWidths=[7.4 * inch])
+        demo_box.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), demo_banner_bg),
+            ('BOX', (0, 0), (-1, -1), 1.5, demo_banner_border),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+            ('LEFTPADDING', (0, 0), (-1, -1), 6),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ]))
+        story.append(demo_box)
+        story.append(Spacer(1, 4))
 
     # 1. Screening Summary
     story.append(Paragraph(t["summary_title"], st["section_header"]))
@@ -991,38 +1064,32 @@ def build_screening_report_pdf(
     ]))
     story.append(alert_box)
 
+    # EXACT PAGE BREAK FOR TECHNICAL SPECIALIST PAGES (MAJOR REPORT INTEGRATION)
+    story.append(PageBreak())
+    tech_story = _build_technical_scorecard_story(session_data, user_data, selected_lang)
+    story.extend(tech_story)
+
     doc.build(story)
     pdf_bytes = buffer.getvalue()
     buffer.close()
     return pdf_bytes
 
 
-def build_technical_scorecard_pdf(
+def _build_technical_scorecard_story(
     session_data: Dict[str, Any],
     user_data: Optional[Dict[str, Any]] = None,
     language: str = "en"
-) -> bytes:
+) -> List[Any]:
     """
-    Builds the 2-Page Technical Research Scorecard & Clinician Review.
-    Page 1: Specialist Model Architectures, Outputs, Segmentation Coverage, MedSigLIP Case Retrieval.
-    Page 2: Cross-Modal Concordance, Reliability Gating Audits (Mendeley Confound), Dataset Provenance, Safe Boundaries.
+    Builds the story flowables for the Technical Research & Clinician Review pages.
     """
     lang = "hi" if language.lower().startswith("hi") else "en"
     t = REPORT_TEXTS[lang]
-    st = _get_shared_styles()
+    st = _get_shared_styles(lang)
     demo = _resolve_demographics(session_data, user_data)
     models = _extract_model_outputs(session_data)
-
-    buffer = io.BytesIO()
-    doc = SimpleDocTemplate(
-        buffer,
-        pagesize=letter,
-        rightMargin=36,
-        leftMargin=36,
-        topMargin=30,
-        bottomMargin=30
-    )
     story = []
+
 
     # =========================================================================
     # PAGE 1 — SPECIALIST ARCHITECTURES & QUANTITATIVE OUTPUTS
@@ -1055,7 +1122,33 @@ def build_technical_scorecard_pdf(
         ('RIGHTPADDING', (0, 0), (-1, -1), 5),
     ]))
     story.append(audit_table)
-    story.append(Spacer(1, 6))
+    story.append(Spacer(1, 4))
+
+    # Demo Reference Mode Notification Banner (if active)
+    demo_ref = session_data.get("demo_reference") or {}
+    if demo_ref.get("is_demo_reference"):
+        demo_banner_bg = colors.HexColor("#fffbeb")
+        demo_banner_border = colors.HexColor("#f59e0b")
+        b_text = demo_ref.get("banner_text") or "DEMO REFERENCE RESULT — PREDEFINED LABEL — NOT AN AI PREDICTION"
+        ref_cat = demo_ref.get("intended_category") or "Reference Control"
+        ref_find = demo_ref.get("reference_finding") or "Presentation Control"
+        demo_box_text = (
+            f"<font color='#b45309'><b>{b_text}</b></font><br/>"
+            f"<b>Technical Audit Notice:</b> Input matched demo reference control (<code>{demo_ref.get('filename')}</code>). "
+            f"Predefined Category: <b>{ref_cat}</b> &bull; Finding: <b>{ref_find}</b>.<br/>"
+            f"<font color='#78350f'><i>Raw model logits, confusion metrics, and reliability gates below reflect genuine unmanipulated inference.</i></font>"
+        )
+        demo_box = Table([[Paragraph(demo_box_text, st["body"])]], colWidths=[7.4 * inch])
+        demo_box.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), demo_banner_bg),
+            ('BOX', (0, 0), (-1, -1), 1.5, demo_banner_border),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+            ('LEFTPADDING', (0, 0), (-1, -1), 6),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ]))
+        story.append(demo_box)
+        story.append(Spacer(1, 4))
 
     # 1. Specialist Model Architectures & Quantitative Outputs
     story.append(Paragraph(t["tech_models_title"], st["section_header"]))
@@ -1402,10 +1495,32 @@ def build_technical_scorecard_pdf(
     ]))
     story.append(footer_table)
 
+    return story
+
+
+def build_technical_scorecard_pdf(
+    session_data: Dict[str, Any],
+    user_data: Optional[Dict[str, Any]] = None,
+    language: str = "en"
+) -> bytes:
+    """
+    Builds the Technical Research Scorecard & Clinician Review PDF.
+    """
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=36,
+        leftMargin=36,
+        topMargin=30,
+        bottomMargin=30
+    )
+    story = _build_technical_scorecard_story(session_data, user_data, language)
     doc.build(story)
     pdf_bytes = buffer.getvalue()
     buffer.close()
     return pdf_bytes
+
 
 
 def build_two_page_pdf(
@@ -1414,11 +1529,16 @@ def build_two_page_pdf(
     language: str = "en",
     doc_type: str = "screening"
 ) -> bytes:
-    """
-    Entry point for generating 2-page PDF documents.
-    Preserves 100% backwards compatibility with existing tests.
-    doc_type: 'screening' for the patient-friendly report, 'scorecard' for the research scorecard.
-    """
+    sid = session_data.get("session_id") or session_data.get("id") or ""
+    cache_key = f"{sid}_{doc_type}_{language}" if sid else None
+    if cache_key and cache_key in _PDF_CACHE:
+        return _PDF_CACHE[cache_key]
+
     if str(doc_type).lower() in ("scorecard", "technical", "research"):
-        return build_technical_scorecard_pdf(session_data, user_data, language)
-    return build_screening_report_pdf(session_data, user_data, language)
+        res = build_technical_scorecard_pdf(session_data, user_data, language)
+    else:
+        res = build_screening_report_pdf(session_data, user_data, language)
+
+    if cache_key:
+        _PDF_CACHE[cache_key] = res
+    return res

@@ -35,6 +35,8 @@ except ImportError:
     TORCH_AVAILABLE = False
 
 
+_GLOBAL_FEATURE_EXTRACTOR = None
+
 class OcularEmbeddingExtractor:
     """
     Extracts dense L2-normalized ocular feature vectors using the trained ResNet-50 backbone.
@@ -54,30 +56,51 @@ class OcularEmbeddingExtractor:
             self._transform = None
 
     def _get_feature_extractor(self):
+        global _GLOBAL_FEATURE_EXTRACTOR
         if not TORCH_AVAILABLE:
             return None
-        if self._model is None:
-            from src.models.anemia_model import AnemiaRegressor
-            checkpoint_path = os.path.join(WORKSPACE_ROOT, "saved_models", "anemia", "best_model.pth")
-            if not os.path.exists(checkpoint_path):
-                return None
-            try:
-                base_model = AnemiaRegressor(pretrained=False)
-                state = torch.load(checkpoint_path, map_location=self.device)
-                if "model_state_dict" in state:
-                    base_model.load_state_dict(state["model_state_dict"])
-                else:
-                    base_model.load_state_dict(state)
-                base_model.eval()
+        if _GLOBAL_FEATURE_EXTRACTOR is not None:
+            return _GLOBAL_FEATURE_EXTRACTOR
+        if self._model is not None:
+            _GLOBAL_FEATURE_EXTRACTOR = self._model
+            return self._model
 
-                # Extract features before the final regression FC layer
-                # ResNet-50: backbone ends at avgpool (dim 2048)
-                modules = list(base_model.backbone.children())[:-1]
+        # Attempt to reuse loaded ResNet-50 from inference service to avoid redundant disk I/O
+        try:
+            from src.inference.unified_service import get_inference_service
+            svc = get_inference_service()
+            if getattr(svc, "_anemia_model", None) is not None:
+                modules = list(svc._anemia_model.backbone.children())[:-1]
                 feature_extractor = torch.nn.Sequential(*modules)
                 feature_extractor.eval()
                 self._model = feature_extractor
-            except Exception as e:
-                self._model = None
+                _GLOBAL_FEATURE_EXTRACTOR = feature_extractor
+                return self._model
+        except Exception:
+            pass
+
+        checkpoint_path = os.path.join(WORKSPACE_ROOT, "saved_models", "anemia", "best_model.pth")
+        if not os.path.exists(checkpoint_path):
+            return None
+        try:
+            from src.models.anemia_model import AnemiaRegressor
+            base_model = AnemiaRegressor(pretrained=False)
+            state = torch.load(checkpoint_path, map_location=self.device)
+            if "model_state_dict" in state:
+                base_model.load_state_dict(state["model_state_dict"])
+            else:
+                base_model.load_state_dict(state)
+            base_model.eval()
+
+            # Extract features before the final regression FC layer
+            # ResNet-50: backbone ends at avgpool (dim 2048)
+            modules = list(base_model.backbone.children())[:-1]
+            feature_extractor = torch.nn.Sequential(*modules)
+            feature_extractor.eval()
+            self._model = feature_extractor
+            _GLOBAL_FEATURE_EXTRACTOR = feature_extractor
+        except Exception as e:
+            self._model = None
         return self._model
 
     def extract_embedding(self, image: Image.Image) -> np.ndarray:

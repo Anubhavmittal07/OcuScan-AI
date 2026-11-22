@@ -22,11 +22,14 @@ from PIL import Image
 def extract_ocular_chromatic_features(img: Image.Image) -> Dict[str, Any]:
     """
     Extracts objective physiological chromatic biomarkers from an ocular image:
-    - Erythema Index (EI): Microvascular perfusion proxy in conjunctival mucosal tissue.
+    - Erythema Index (EI): Microvascular perfusion proxy in palpebral conjunctival mucosal tissue.
     - CIE-L*a*b* a* (Red-Green chroma): Palpebral erythema / pallor indicator.
     - CIE-L*a*b* b* (Yellow-Blue chroma): Scleral bilirubin staining indicator.
     - Scleral Yellowness Index (SYI): Optical yellowing ratio (R+G) / (2*B).
-    Isolates ocular anatomical tissue to prevent facial skin undertones from biasing measurements.
+    - Scleral a* (Scleral Erythema / Injection): Bulbar conjunctival redness for injection screening.
+    - Pupil Clarity & Lens Density: Evaluates pupillary transparency and opacification.
+    - Focal Eyelid Margin Nodule: Checks for localized inflammatory nodules (stye / hordeolum).
+    Isolates mucosal tissue from facial skin to prevent skin undertones from biasing measurements.
     """
     if not isinstance(img, Image.Image):
         return {
@@ -34,8 +37,11 @@ def extract_ocular_chromatic_features(img: Image.Image) -> Dict[str, Any]:
             "cie_a_star": 0.0,
             "cie_b_star": 0.0,
             "scleral_yellowness_index": 1.0,
+            "scleral_a_star": 0.0,
             "mean_luminance": 128.0,
-            "pallor_indicator": "unknown"
+            "pallor_indicator": "unknown",
+            "has_clear_pupil": True,
+            "has_focal_stye_nodule": False
         }
 
     rgb_img = img.convert('RGB')
@@ -43,58 +49,89 @@ def extract_ocular_chromatic_features(img: Image.Image) -> Dict[str, Any]:
     uint8_arr = np.uint8(np.clip(arr, 0, 255))
     lab = cv2.cvtColor(uint8_arr, cv2.COLOR_RGB2LAB)
     hsv = cv2.cvtColor(uint8_arr, cv2.COLOR_RGB2HSV)
+    gray = cv2.cvtColor(uint8_arr, cv2.COLOR_RGB2GRAY)
 
     # Exclude black padding borders (pixels where R=G=B=0)
     non_black = (arr[:, :, 0] > 10) | (arr[:, :, 1] > 10) | (arr[:, :, 2] > 10)
-
-    # 1. Sclera candidate pixels (White sclera or Jaundiced yellow sclera)
-    sclera_white = (lab[:, :, 0] > 90) & (hsv[:, :, 1] < 70) & (hsv[:, :, 2] > 60) & non_black
     b_val = lab[:, :, 2].astype(float) - 128.0
     a_val = lab[:, :, 1].astype(float) - 128.0
-    sclera_yellow = (b_val >= 14.0) & (b_val - a_val >= 4.0) & (hsv[:, :, 0] >= 12) & (hsv[:, :, 0] <= 55) & (lab[:, :, 0] > 65) & non_black
+    l_val = lab[:, :, 0].astype(float)
+
+    # 1. Sclera candidate pixels (White sclera or Jaundiced yellow sclera)
+    sclera_white = (l_val > 85) & (hsv[:, :, 1] < 65) & (hsv[:, :, 2] > 55) & non_black
+    sclera_yellow = (b_val >= 14.0) & (b_val - a_val >= 4.0) & (hsv[:, :, 0] >= 12) & (hsv[:, :, 0] <= 55) & (l_val > 65) & non_black
     sclera_mask = sclera_white | sclera_yellow
-    if sclera_mask.sum() > 150:
+    if sclera_mask.sum() > 100:
         sclera_lab = lab[sclera_mask]
         sclera_rgb = arr[sclera_mask]
         b_star = float(sclera_lab[:, 2].mean()) - 128.0
+        a_star_sc = float(sclera_lab[:, 1].mean()) - 128.0
         r_sc = float(sclera_rgb[:, 0].mean())
         g_sc = float(sclera_rgb[:, 1].mean())
         b_sc = float(sclera_rgb[:, 2].mean())
         syi = (r_sc + g_sc) / (2.0 * max(b_sc, 1.0))
     else:
         b_star = float(lab[non_black, 2].mean()) - 128.0 if non_black.sum() > 0 else 0.0
+        a_star_sc = float(lab[non_black, 1].mean()) - 128.0 if non_black.sum() > 0 else 0.0
         syi = 1.0
 
-    # 2. Conjunctival mucosal vascular bed (R > G, a* > 6.0, moderate L)
-    conj_mask = (lab[:, :, 1].astype(float) - 128.0 > 6.0) & (lab[:, :, 0] > 60) & non_black
-    if conj_mask.sum() > 150:
-        conj_lab = lab[conj_mask]
-        conj_rgb = arr[conj_mask]
-        a_star = float(conj_lab[:, 1].mean()) - 128.0
-        r_c = float(conj_rgb[:, 0].mean())
-        g_c = float(conj_rgb[:, 1].mean())
+    # 2. Palpebral conjunctival mucosal vascular bed
+    # Differentiates vascularized mucosal tissue (a* >= 13, R > 1.08*G) from ordinary facial skin (a* 6-10)
+    mucosa_mask = (a_val > 13.0) & (arr[:, :, 0] > arr[:, :, 1] * 1.08) & non_black
+    if mucosa_mask.sum() > 60:
+        mucosa_lab = lab[mucosa_mask]
+        mucosa_rgb = arr[mucosa_mask]
+        a_star = float(mucosa_lab[:, 1].mean()) - 128.0
+        r_c = float(mucosa_rgb[:, 0].mean())
+        g_c = float(mucosa_rgb[:, 1].mean())
         ei = (r_c - g_c) / (r_c + g_c + 1e-6)
     else:
-        a_star = float(lab[non_black, 1].mean()) - 128.0 if non_black.sum() > 0 else 0.0
-        ei = 0.15
+        # Fallback to general ocular region
+        general_red = (a_val > 6.0) & (l_val > 60) & non_black
+        if general_red.sum() > 100:
+            gen_lab = lab[general_red]
+            gen_rgb = arr[general_red]
+            a_star = float(gen_lab[:, 1].mean()) - 128.0
+            r_c = float(gen_rgb[:, 0].mean())
+            g_c = float(gen_rgb[:, 1].mean())
+            ei = (r_c - g_c) / (r_c + g_c + 1e-6)
+        else:
+            a_star = float(lab[non_black, 1].mean()) - 128.0 if non_black.sum() > 0 else 0.0
+            ei = 0.15
 
     l_mean = float(lab[non_black, 0].mean()) if non_black.sum() > 0 else 128.0
 
     # Pallor assessment based on genuine conjunctival mucosal vascular bed
-    if ei < 0.10 or a_star < 8.0:
+    if ei < 0.11 or a_star < 9.0:
         pallor_state = "marked_pallor"
-    elif ei < 0.15 or a_star < 12.0:
+    elif ei < 0.16 or a_star < 13.0:
         pallor_state = "mild_pallor"
     else:
         pallor_state = "normal_erythema"
+
+    # 3. Pupillary transparency / Cataractous opacity assessment
+    dark_pupil = (gray < 55) & non_black
+    has_clear_pupil = (dark_pupil.sum() > 250)
+
+    # 4. Focal Eyelid Margin Nodule (Stye / Hordeolum)
+    focal_stye_candidates = (a_val > 20.0) & (l_val > 60) & (l_val < 195) & non_black
+    has_focal_stye = False
+    if focal_stye_candidates.sum() > 60:
+        total_valid = max(non_black.sum(), 1)
+        ratio = focal_stye_candidates.sum() / total_valid
+        if 0.001 <= ratio <= 0.08:
+            has_focal_stye = True
 
     return {
         "erythema_index": round(float(ei), 3),
         "cie_a_star": round(float(a_star), 2),
         "cie_b_star": round(float(b_star), 2),
         "scleral_yellowness_index": round(float(syi), 3),
+        "scleral_a_star": round(float(a_star_sc), 2),
         "mean_luminance": round(float(l_mean), 1),
-        "pallor_indicator": pallor_state
+        "pallor_indicator": pallor_state,
+        "has_clear_pupil": bool(has_clear_pupil),
+        "has_focal_stye_nodule": bool(has_focal_stye)
     }
 
 
@@ -247,7 +284,7 @@ def compute_anemia_clinical_decision(
         urgency = "routine"
 
     # 4. Critical Diagnostic Boundary / Equivocal Zone Detection (MAE ~1.50 g/dL)
-    is_borderline = (abs(hb_val - norm_threshold) <= 1.50) or (abs(hb_val - mod_cutoff) <= 0.85)
+    is_borderline = bool(who_stage == "mild_anemia" and ((abs(float(hb_val) - norm_threshold) <= 1.50) or (abs(float(hb_val) - mod_cutoff) <= 0.85)))
     if is_borderline:
         certainty = "borderline_threshold_equivocal"
         certainty_desc_en = (
@@ -327,7 +364,7 @@ def compute_slid_clinical_decision(
     Clinical decision support for SLID Anterior Slit-Lamp Hyperemia Screening.
     Differentiates visible conjunctival injection from normal ocular surface.
     """
-    is_normal = (predicted_class == "control_normal")
+    is_normal = bool(predicted_class == "control_normal")
     if is_normal:
         status_en = "Normal Ocular Surface"
         status_hi = "सामान्य नेत्र सतह (हाइपरिमिया अनुपस्थित)"
@@ -431,6 +468,38 @@ def compute_cataract_clinical_decision(
     Clinical decision support for Nuclear Cataract Detection and LOCS III Severity Grading.
     Differentiates clear crystalline lens from nuclear cataract.
     """
+    if str(predicted_class).lower() in ("inconclusive_modality", "unsupported_image", "inconclusive", "none"):
+        status_en = "Inconclusive (Slit-Lamp Cross-Section Required)"
+        status_hi = "अनिर्णायक (स्लिट-लैम्प बायोमाइक्रोस्कोपी आवश्यक)"
+        risk_color = "#64748b"
+        summary_en = (
+            "Crystalline lens nuclear clarity cannot be reliably graded from standard external photography. "
+            "Definitively grading nuclear cataract under LOCS III requires optical slit-beam sectioning and "
+            "retroillumination through a dilated pupil under slit-lamp biomicroscopy."
+        )
+        guidance_en = [
+            "Comprehensive Slit-Lamp Biomicroscopy: An in-person slit-lamp exam with dilated pupil by an ophthalmologist is mandatory to evaluate crystalline lens opacity.",
+            "Do not assume lens is clear or diseased from an external smartphone, webcam, or ambient photograph.",
+            "Schedule a routine clinical eye exam if experiencing progressive painless blurring, glare, or night driving difficulties."
+        ]
+        return {
+            "finding_en": status_en,
+            "finding_hi": status_hi,
+            "is_cataract": None,
+            "risk_color": risk_color,
+            "confidence_pct": None,
+            "locs_grade_est": None,
+            "locs_description_en": "Not assessed (requires focused slit-lamp biomicroscopy)",
+            "summary_en": summary_en,
+            "clinical_action_guidance": guidance_en,
+            "bilingual_advice": {
+                "finding_en": status_en,
+                "finding_hi": status_hi,
+                "guidance_en": guidance_en
+            },
+            "slit_lamp_modality_requirement": "Optical cross-section under slit illumination is required for clinical LOCS III grading."
+        }
+
     is_normal = (predicted_class == "normal_clear_lens")
     grade = locs_grade_est or (1 if is_normal else 2)
 
@@ -500,6 +569,36 @@ def compute_stye_clinical_decision(
     Clinical decision support for Stye / Hordeolum Screening.
     Differentiates acute localized eyelid margin inflammation from normal eyelid appearance.
     """
+    if str(predicted_class).lower() in ("inconclusive_view", "unsupported_image", "inconclusive", "none"):
+        status_en = "Inconclusive (Resting Eyelid Margin Required)"
+        status_hi = "अनिर्णायक (सामान्य पलक का दृश्य आवश्यक)"
+        risk_color = "#64748b"
+        summary_en = (
+            "Eyelid margin cannot be reliably evaluated from this view. "
+            "The eyelid appears retracted, everted, or obscured for conjunctival inspection; "
+            "a resting anterior macro eyelid margin contour is required to evaluate hordeolum / stye lesions."
+        )
+        guidance_en = [
+            "Capture an anterior macro close-up of the eye in its natural resting position without pulling down or everting the eyelid.",
+            "Maintain general eyelid hygiene with gentle warm cleansing.",
+            "Consult an eye specialist if localized eyelid tenderness, swelling, or pustules are present."
+        ]
+        return {
+            "finding_en": status_en,
+            "finding_hi": status_hi,
+            "is_stye": None,
+            "risk_color": risk_color,
+            "confidence_pct": None,
+            "chromatic_erythema": (chromatic or {}).get("erythema_index", 0.0),
+            "summary_en": summary_en,
+            "clinical_action_guidance": guidance_en,
+            "bilingual_advice": {
+                "finding_en": status_en,
+                "finding_hi": status_hi,
+                "guidance_en": guidance_en
+            }
+        }
+
     is_normal = (predicted_class == "normal")
     ei = (chromatic or {}).get("erythema_index", 0.0)
 
