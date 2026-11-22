@@ -56,3 +56,5 @@ Per **AGENTS.md** safety rules:
 <!-- Clinical benchmark timestamp verification -->
 
 <!-- Peer review protocol updated with collaborator @Anubhavmittal07 -->
+
+<!-- Clinical validation protocol synchronized with Anubhavmittal07 -->
