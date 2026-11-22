@@ -471,3 +471,4 @@ Clinical Computer Vision Screening Research & Validation Log
 - [2026-11-22 15:30] Activity #178: validate bilateral eyelid ROI consistency across multicenter samples
 - [2026-11-22 15:30] Activity #179: audit glare reflection detection thresholds on slit-lamp captures
 - [2026-11-22 15:30] Activity #180: tune CIE-LAB luminance equalization to prevent chromatic distortion
+- [2026-11-22 15:30] Activity #181: verify zero-leakage subject partitioning across validation folds
