@@ -60,3 +60,5 @@ temp/
 .coverage
 htmlcov/
 /*.png
+
+tmp_repo_cv/
